@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "AlphaZJobs"
+description = "AlphaZJobs is a professional social platform for Gen Z and Gen Alpha — high school creators, early developers, and emerging talent. It normalizes all job types (influencer, developer, designer, etc.), features AI job matching, DMs, and community Rooms. Dark mode, minimalist aesthetic inspired by pollencarrers.co, with a 'Chronically Online' language mode."
+version = "1.0.0"
+id = "artifacts/alphazjobs"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22174
+
+[services.development]
+run = "pnpm --filter @workspace/alphazjobs run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/alphazjobs", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/alphazjobs/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22174"
+BASE_PATH = "/"
