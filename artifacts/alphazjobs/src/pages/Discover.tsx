@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, SlidersHorizontal, Briefcase, Users, Trophy, X } from 'lucide-react';
+import { Search, SlidersHorizontal, Briefcase, Users, Trophy, X, LayoutList, Layers } from 'lucide-react';
 import { Link } from 'wouter';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { JobCard } from '@/components/JobCard';
 import { ChallengeCard } from '@/components/ChallengeCard';
+import { SwipeJobStack } from '@/components/SwipeJobStack';
 import { UserAvatar } from '@/components/UserAvatar';
 import { BottomNav } from '@/components/BottomNav';
 import { TopNav } from '@/components/TopNav';
@@ -15,6 +16,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 
 type TabType = 'jobs' | 'people' | 'challenges';
+type JobsViewMode = 'list' | 'swipe';
 type JobType = Job['type'];
 const JOB_TYPES: JobType[] = ['remote', 'hybrid', 'onsite'];
 
@@ -30,6 +32,7 @@ export default function Discover() {
   const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<TabType>('jobs');
+  const [jobsViewMode, setJobsViewMode] = useState<JobsViewMode>('list');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [selectedJobTypes, setSelectedJobTypes] = useState<JobType[]>([]);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
@@ -300,12 +303,49 @@ export default function Discover() {
         {/* Jobs tab */}
         {activeTab === 'jobs' && (
           <>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Mobile-only list/swipe toggle */}
+            <div className="flex md:hidden gap-1 bg-card border border-border rounded-lg p-1 mb-6 w-fit">
+              <button
+                onClick={() => setJobsViewMode('list')}
+                className={cn(
+                  'flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold transition-all',
+                  jobsViewMode === 'list'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <LayoutList className="w-3.5 h-3.5" />
+                List
+              </button>
+              <button
+                onClick={() => setJobsViewMode('swipe')}
+                className={cn(
+                  'flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold transition-all',
+                  jobsViewMode === 'swipe'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                Swipe
+              </button>
+            </div>
+
+            {jobsViewMode === 'swipe' && (
+              <div className="md:hidden">
+                <SwipeJobStack
+                  key={`${searchQuery}|${selectedJobTypes.join(',')}|${selectedSkills.join(',')}`}
+                  jobs={filteredJobs}
+                />
+              </div>
+            )}
+
+            <div className={cn('grid grid-cols-1 lg:grid-cols-2 gap-6', jobsViewMode === 'swipe' && 'hidden md:grid')}>
               {filteredJobs.map((job, index) => (
                 <JobCard key={job.id} job={job} index={index} />
               ))}
             </div>
-            {filteredJobs.length === 0 && (
+            {filteredJobs.length === 0 && jobsViewMode === 'list' && (
               <div className="text-center py-16">
                 <p className="text-muted-foreground">{t.empty.noJobs}</p>
               </div>
