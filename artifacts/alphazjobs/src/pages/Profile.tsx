@@ -30,7 +30,7 @@ export default function Profile() {
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
           <div className="flex items-start gap-4">
-            <UserAvatar name={displayUser.name} className="w-20 h-20 text-2xl" />
+            <UserAvatar name={displayUser.name} src={displayUser.avatar} className="w-20 h-20 text-2xl" />
             <div>
               <h1 className="text-3xl font-black">{displayUser.name}</h1>
               <div className="flex items-center gap-2 mt-1">

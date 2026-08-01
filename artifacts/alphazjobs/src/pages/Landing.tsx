@@ -3,10 +3,12 @@ import { Link } from 'wouter';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useUser } from '@/contexts/UserContext';
 import { jobs } from '@/data/mock-data';
 
 export default function Landing() {
   const { t } = useLanguage();
+  const { isOnboarded } = useUser();
 
   const featuredJobs = jobs.slice(0, 3);
 
@@ -35,9 +37,9 @@ export default function Landing() {
             {t.headings.landingSub}
           </p>
 
-          <Link href="/onboarding">
+          <Link href={isOnboarded ? '/discover' : '/onboarding'}>
             <Button size="lg" className="text-lg px-8 py-6 group">
-              {t.buttons.startBuilding}
+              {isOnboarded ? 'Back to Discover' : t.buttons.startBuilding}
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
           </Link>

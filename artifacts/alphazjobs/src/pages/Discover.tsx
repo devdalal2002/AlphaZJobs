@@ -135,7 +135,7 @@ export default function Discover() {
                   }}
                 >
                   <div className="flex items-start gap-4 mb-4">
-                    <UserAvatar name={person.name} className="w-14 h-14" />
+                    <UserAvatar name={person.name} src={person.avatar} className="w-14 h-14" />
                     <div className="flex-1 min-w-0">
                       <h3 className="font-bold text-lg group-hover:text-primary transition-colors truncate">
                         {person.name}

@@ -1,5 +1,7 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '@/data/mock-data';
+
+const STORAGE_KEY = 'alphazjobs.user';
 
 interface OnboardingData {
   name: string;
@@ -7,6 +9,7 @@ interface OnboardingData {
   bio: string;
   skills: string[];
   interests: string[];
+  avatar?: string;
 }
 
 interface UserContextType {
@@ -18,9 +21,30 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
+function loadStoredUser(): User | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as User) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isOnboarded, setIsOnboarded] = useState(false);
+  const [user, setUser] = useState<User | null>(() => loadStoredUser());
+  const [isOnboarded, setIsOnboarded] = useState(() => loadStoredUser() !== null);
+
+  useEffect(() => {
+    try {
+      if (user) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+      } else {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    } catch {
+      // localStorage unavailable (e.g. private browsing quota) - fail silently, state still works in-memory
+    }
+  }, [user]);
 
   const completeOnboarding = (data: OnboardingData) => {
     const newUser: User = {
@@ -32,6 +56,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       interests: data.interests,
       lookingFor: ['Internship', 'Freelance gig', 'Mentorship'],
       projects: [],
+      avatar: data.avatar,
     };
     setUser(newUser);
     setIsOnboarded(true);

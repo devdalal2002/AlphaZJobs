@@ -1,19 +1,22 @@
-import { useState } from 'react';
+import { useState, useRef, type ChangeEvent } from 'react';
 import { useLocation } from 'wouter';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { SkillSelector } from '@/components/SkillSelector';
+import { UserAvatar } from '@/components/UserAvatar';
 import { availableSkills, availableInterests, currentUser as fallbackUser } from '@/data/mock-data';
 import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
+import { fileToResizedDataUrl } from '@/lib/image';
 
 export default function ProfileEdit() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { user, setUser } = useUser();
   const displayUser = user ?? fallbackUser;
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     name: displayUser.name,
@@ -21,7 +24,23 @@ export default function ProfileEdit() {
     bio: displayUser.bio,
     skills: displayUser.skills,
     interests: displayUser.interests,
+    avatar: displayUser.avatar ?? '',
   });
+
+  const handlePhotoSelect = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'Not an image', description: 'Please pick an image file.' });
+      return;
+    }
+    try {
+      const dataUrl = await fileToResizedDataUrl(file);
+      setFormData((prev) => ({ ...prev, avatar: dataUrl }));
+    } catch {
+      toast({ title: "Couldn't load that photo", description: 'Try a different image.' });
+    }
+  };
 
   const handleSave = () => {
     const updatedUser = {
@@ -31,6 +50,7 @@ export default function ProfileEdit() {
       bio: formData.bio,
       skills: formData.skills,
       interests: formData.interests,
+      avatar: formData.avatar || undefined,
     };
     setUser(updatedUser);
     toast({
@@ -62,6 +82,33 @@ export default function ProfileEdit() {
 
         {/* Form */}
         <div className="space-y-8">
+          <div className="flex flex-col items-center gap-3">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="relative w-24 h-24 rounded-full group"
+            >
+              <UserAvatar
+                name={formData.name || displayUser.name}
+                src={formData.avatar || undefined}
+                className="w-24 h-24 text-2xl"
+              />
+              <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                <Camera className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoSelect}
+              className="hidden"
+            />
+            <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+              {formData.avatar ? 'Change photo' : 'Upload photo'}
+            </Button>
+          </div>
+
           <div>
             <label className="block text-sm font-semibold mb-2">Name</label>
             <Input

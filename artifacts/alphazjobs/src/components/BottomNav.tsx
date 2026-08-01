@@ -1,14 +1,17 @@
 import { Home, Briefcase, User, MessageCircle, Users } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useUser } from '@/contexts/UserContext';
 import { cn } from '@/lib/utils';
 
 export function BottomNav() {
   const [location] = useLocation();
   const { t } = useLanguage();
+  const { isOnboarded } = useUser();
+  const homeHref = isOnboarded ? '/discover' : '/';
 
   const navItems = [
-    { href: '/', icon: Home, label: t.nav.home },
+    { href: homeHref, icon: Home, label: t.nav.home },
     { href: '/discover', icon: Briefcase, label: t.nav.discover },
     { href: '/profile', icon: User, label: t.nav.profile },
     { href: '/messages', icon: MessageCircle, label: t.nav.messages, badge: true },
