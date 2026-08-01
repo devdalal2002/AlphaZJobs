@@ -1,12 +1,14 @@
 import { useState, useRef, type ChangeEvent } from 'react';
 import { useLocation } from 'wouter';
-import { ArrowLeft, Save, Camera } from 'lucide-react';
+import { ArrowLeft, Save, Camera, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SkillSelector } from '@/components/SkillSelector';
 import { UserAvatar } from '@/components/UserAvatar';
-import { availableSkills, availableInterests, currentUser as fallbackUser } from '@/data/mock-data';
+import { availableSkills, availableInterests, currentUser as fallbackUser, PlatformIntegration } from '@/data/mock-data';
+import { platforms, platformMap, PlatformId } from '@/data/platforms';
 import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
 import { fileToResizedDataUrl } from '@/lib/image';
@@ -25,7 +27,32 @@ export default function ProfileEdit() {
     skills: displayUser.skills,
     interests: displayUser.interests,
     avatar: displayUser.avatar ?? '',
+    platformIntegrations: displayUser.platformIntegrations ?? [],
   });
+
+  const [newPlatform, setNewPlatform] = useState<PlatformId | ''>('');
+  const [newHandle, setNewHandle] = useState('');
+
+  const linkedPlatformIds = new Set(formData.platformIntegrations.map((p) => p.platform));
+  const availablePlatforms = platforms.filter((p) => !linkedPlatformIds.has(p.id));
+
+  const handleAddPlatform = () => {
+    if (!newPlatform || !newHandle.trim()) return;
+    const integration: PlatformIntegration = { platform: newPlatform, handle: newHandle.trim() };
+    setFormData((prev) => ({
+      ...prev,
+      platformIntegrations: [...prev.platformIntegrations, integration],
+    }));
+    setNewPlatform('');
+    setNewHandle('');
+  };
+
+  const handleRemovePlatform = (platform: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      platformIntegrations: prev.platformIntegrations.filter((p) => p.platform !== platform),
+    }));
+  };
 
   const handlePhotoSelect = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -51,6 +78,7 @@ export default function ProfileEdit() {
       skills: formData.skills,
       interests: formData.interests,
       avatar: formData.avatar || undefined,
+      platformIntegrations: formData.platformIntegrations,
     };
     setUser(updatedUser);
     toast({
@@ -153,6 +181,72 @@ export default function ProfileEdit() {
                 setFormData({ ...formData, interests })
               }
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-2">Connected platforms</label>
+            {formData.platformIntegrations.length > 0 && (
+              <div className="space-y-2 mb-3">
+                {formData.platformIntegrations.map((integration) => {
+                  const meta = platformMap[integration.platform as PlatformId];
+                  const Icon = meta?.icon;
+                  return (
+                    <div
+                      key={integration.platform}
+                      className="flex items-center gap-3 bg-card border border-border rounded-lg p-3"
+                    >
+                      {Icon && <Icon className="w-4 h-4 text-primary shrink-0" />}
+                      <span className="text-sm font-medium flex-1 min-w-0 truncate">
+                        {meta?.label ?? integration.platform} · @{integration.handle}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 shrink-0"
+                        onClick={() => handleRemovePlatform(integration.platform)}
+                        aria-label="Remove platform"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {availablePlatforms.length > 0 && (
+              <div className="flex gap-2">
+                <Select value={newPlatform} onValueChange={(v) => setNewPlatform(v as PlatformId)}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Platform" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availablePlatforms.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  placeholder="username"
+                  value={newHandle}
+                  onChange={(e) => setNewHandle(e.target.value)}
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={handleAddPlatform}
+                  disabled={!newPlatform || !newHandle.trim()}
+                  aria-label="Add platform"
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>

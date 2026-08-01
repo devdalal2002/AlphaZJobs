@@ -9,6 +9,11 @@ export interface Job {
   type: 'remote' | 'hybrid' | 'onsite';
 }
 
+export interface PlatformIntegration {
+  platform: string;
+  handle: string;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -19,6 +24,7 @@ export interface User {
   lookingFor: string[];
   projects: string[];
   avatar?: string;
+  platformIntegrations?: PlatformIntegration[];
 }
 
 export interface Message {
@@ -169,6 +175,10 @@ export const currentUser: User = {
   interests: ['Startup tech', 'Open source', 'Building in public'],
   lookingFor: ['Internship', 'Freelance gig', 'Mentorship'],
   projects: ['Personal portfolio site', 'Weather app using OpenWeather API'],
+  platformIntegrations: [
+    { platform: 'github', handle: 'alexchen' },
+    { platform: 'tiktok', handle: 'alex.codes' },
+  ],
 };
 
 export const sampleUsers: User[] = [

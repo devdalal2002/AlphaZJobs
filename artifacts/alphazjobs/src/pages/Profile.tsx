@@ -1,5 +1,5 @@
 import { Link } from 'wouter';
-import { Edit, Sparkles, ExternalLink, Settings, ShieldCheck, Bookmark, X, Trophy, CheckCircle2, Clock } from 'lucide-react';
+import { Edit, Sparkles, ExternalLink, Settings, ShieldCheck, Bookmark, X, Trophy, CheckCircle2, Clock, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { UserAvatar } from '@/components/UserAvatar';
@@ -8,6 +8,7 @@ import { TopNav } from '@/components/TopNav';
 import { useUser } from '@/contexts/UserContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { currentUser as fallbackUser, jobs, sampleReceipts } from '@/data/mock-data';
+import { platformMap, PlatformId } from '@/data/platforms';
 
 function getAgeDisplay(age: number): string {
   if (age < 18) {
@@ -154,6 +155,43 @@ export default function Profile() {
                 <span className="text-primary underline cursor-pointer">Take on a Challenge</span>
               </Link>{' '}
               to earn your first one.
+            </p>
+          )}
+        </div>
+
+        {/* Connected platforms */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4">Your vibe</h2>
+          {displayUser.platformIntegrations && displayUser.platformIntegrations.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {displayUser.platformIntegrations.map((integration) => {
+                const meta = platformMap[integration.platform as PlatformId];
+                const Icon = meta?.icon ?? Link2;
+                const url = meta ? meta.urlTemplate(integration.handle) : integration.handle;
+                return (
+                  <a
+                    key={integration.platform}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-all group"
+                  >
+                    <Icon className="w-5 h-5 text-primary shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold">{meta?.label ?? integration.platform}</p>
+                      <p className="text-xs text-muted-foreground truncate">@{integration.handle}</p>
+                    </div>
+                    <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                  </a>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No platforms linked yet.{' '}
+              <Link href="/profile/edit">
+                <span className="text-primary underline cursor-pointer">Connect one</span>
+              </Link>
             </p>
           )}
         </div>
