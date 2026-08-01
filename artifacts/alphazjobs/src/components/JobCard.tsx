@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin } from 'lucide-react';
 import { Job } from '@/data/mock-data';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { QuickApplyDialog } from '@/components/QuickApplyDialog';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
@@ -15,17 +17,10 @@ interface JobCardProps {
 export function JobCard({ job, index }: JobCardProps) {
   const { t } = useLanguage();
   const { toast } = useToast();
-  const { savedJobIds, appliedJobIds, toggleSaveJob, applyToJob } = useUser();
+  const { savedJobIds, appliedJobIds, toggleSaveJob } = useUser();
   const saved = savedJobIds.includes(job.id);
   const applied = appliedJobIds.includes(job.id);
-
-  const handleApply = () => {
-    applyToJob(job.id);
-    toast({
-      title: 'Applied!',
-      description: `Your application for ${job.title} at ${job.company} has been sent.`,
-    });
-  };
+  const [applyOpen, setApplyOpen] = useState(false);
 
   const handleSave = () => {
     toggleSaveJob(job.id);
@@ -83,7 +78,7 @@ export function JobCard({ job, index }: JobCardProps) {
           </Button>
           <Button
             size="sm"
-            onClick={handleApply}
+            onClick={() => setApplyOpen(true)}
             disabled={applied}
             variant={applied ? 'outline' : 'default'}
           >
@@ -91,6 +86,8 @@ export function JobCard({ job, index }: JobCardProps) {
           </Button>
         </div>
       </div>
+
+      <QuickApplyDialog job={job} open={applyOpen} onOpenChange={setApplyOpen} />
     </motion.div>
   );
 }

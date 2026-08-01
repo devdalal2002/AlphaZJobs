@@ -6,19 +6,30 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { TopNav } from '@/components/TopNav';
+import { QuickApplyDialog } from '@/components/QuickApplyDialog';
 import { jobs, currentUser as fallbackUser } from '@/data/mock-data';
 import { useUser } from '@/contexts/UserContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 
+interface JobMatch {
+  job: typeof jobs[0];
+  match: number;
+  skillsScore: number;
+  interestScore: number;
+  reason: string;
+}
+
 export default function AIMatch() {
   const { t } = useLanguage();
-  const { user, savedJobIds, appliedJobIds, toggleSaveJob, applyToJob } = useUser();
+  const { user, savedJobIds, appliedJobIds, toggleSaveJob } = useUser();
   const { toast } = useToast();
   const activeUser = user ?? fallbackUser;
 
   const [isLoading, setIsLoading] = useState(true);
-  const [matches, setMatches] = useState<Array<{ job: typeof jobs[0]; match: number; reason: string }>>([]);
+  const [matches, setMatches] = useState<JobMatch[]>([]);
+  const [applyJobId, setApplyJobId] = useState<string | null>(null);
+  const applyJob = matches.find((m) => m.job.id === applyJobId)?.job ?? null;
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -28,20 +39,25 @@ export default function AIMatch() {
           const matchingSkills = job.skills.filter((skill) =>
             userSkills.includes(skill)
           );
+          const skillsScore = matchingSkills.length > 0
+            ? Math.round((matchingSkills.length / job.skills.length) * 100)
+            : 0;
+
+          const interestHit = activeUser.interests.find((interest) =>
+            `${job.title} ${job.description}`.toLowerCase().includes(interest.toLowerCase())
+          );
+          const interestScore = interestHit ? 100 : matchingSkills.length > 0 ? 60 : 30;
+
           const matchPercentage = Math.min(
             95,
-            Math.max(
-              55,
-              matchingSkills.length > 0
-                ? (matchingSkills.length / job.skills.length) * 100
-                : 55 + Math.random() * 15
-            )
+            Math.max(55, Math.round(skillsScore * 0.7 + interestScore * 0.3))
           );
 
           let reason = '';
           if (matchingSkills.length > 0) {
-            const interestPart =
-              activeUser.interests.length > 0
+            const interestPart = interestHit
+              ? ` + interest in ${interestHit}`
+              : activeUser.interests.length > 0
                 ? ` + interest in ${activeUser.interests[0]}`
                 : '';
             reason = `Your ${matchingSkills.join(' & ')} skills${interestPart} = perfect fit`;
@@ -55,7 +71,9 @@ export default function AIMatch() {
 
           return {
             job,
-            match: Math.round(matchPercentage),
+            match: matchPercentage,
+            skillsScore,
+            interestScore,
             reason,
           };
         })
@@ -68,11 +86,6 @@ export default function AIMatch() {
 
     return () => clearTimeout(timer);
   }, [activeUser]);
-
-  const handleApply = (jobId: string, jobTitle: string) => {
-    applyToJob(jobId);
-    toast({ title: 'Applied!', description: `Application sent for ${jobTitle}.` });
-  };
 
   const handleSave = (jobId: string, jobTitle: string) => {
     const wasSaved = savedJobIds.includes(jobId);
@@ -145,13 +158,31 @@ export default function AIMatch() {
                     className="bg-card border border-border rounded-lg p-6 hover:border-primary/50 transition-all"
                   >
                     {/* Match Percentage */}
-                    <div className="flex items-center gap-3 mb-4">
+                    <div className="flex items-center gap-3 mb-3">
                       <div className="flex items-center gap-2 text-primary">
                         <TrendingUp className="w-5 h-5" />
                         <span className="text-2xl font-black">{match.match}%</span>
                       </div>
                       <div className="flex-1">
                         <Progress value={match.match} className="h-2" />
+                      </div>
+                    </div>
+
+                    {/* Match Breakdown */}
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      <div>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                          <span>Skills match</span>
+                          <span>{match.skillsScore}%</span>
+                        </div>
+                        <Progress value={match.skillsScore} className="h-1.5" />
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                          <span>Interest fit</span>
+                          <span>{match.interestScore}%</span>
+                        </div>
+                        <Progress value={match.interestScore} className="h-1.5" />
                       </div>
                     </div>
 
@@ -197,7 +228,7 @@ export default function AIMatch() {
                         </Button>
                         <Button
                           size="sm"
-                          onClick={() => handleApply(match.job.id, match.job.title)}
+                          onClick={() => setApplyJobId(match.job.id)}
                           disabled={appliedJobIds.includes(match.job.id)}
                           variant={appliedJobIds.includes(match.job.id) ? 'outline' : 'default'}
                         >
@@ -212,6 +243,14 @@ export default function AIMatch() {
           )}
         </AnimatePresence>
       </div>
+
+      {applyJob && (
+        <QuickApplyDialog
+          job={applyJob}
+          open={applyJobId !== null}
+          onOpenChange={(open) => !open && setApplyJobId(null)}
+        />
+      )}
     </div>
   );
 }
