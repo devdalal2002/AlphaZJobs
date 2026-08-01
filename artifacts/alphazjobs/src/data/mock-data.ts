@@ -48,6 +48,24 @@ export interface Room {
   messages: Message[];
 }
 
+export interface Challenge {
+  id: string;
+  title: string;
+  description: string;
+  postedBy: string;
+  skillsRequired: string[];
+}
+
+export interface Receipt {
+  id: string;
+  challengeId: string;
+  challengeTitle: string;
+  completedFor: string;
+  date: string;
+  skillsProven: string[];
+  status: 'pending' | 'verified';
+}
+
 export const jobs: Job[] = [
   {
     id: '1',
@@ -384,6 +402,65 @@ export const rooms: Room[] = [
         isMe: false,
       },
     ],
+  },
+];
+
+export const challenges: Challenge[] = [
+  {
+    id: 'c1',
+    title: 'Edit this 30s reel',
+    description: 'Turn a raw clip into a punchy 30-second short with captions and trending audio.',
+    postedBy: '@jenna.creates',
+    skillsRequired: ['Video Editing', 'Trending Audio'],
+  },
+  {
+    id: 'c2',
+    title: 'Fix this login bug',
+    description: 'A small React app has broken form validation on the login page. Find and fix it.',
+    postedBy: 'ScaleUp',
+    skillsRequired: ['React', 'JavaScript'],
+  },
+  {
+    id: 'c3',
+    title: 'Design a landing page hero',
+    description: 'Mock up a hero section for a new app launch — mobile and desktop.',
+    postedBy: 'AppStudio',
+    skillsRequired: ['Figma', 'UX Research'],
+  },
+  {
+    id: 'c4',
+    title: 'Sketch 3 thumbnail concepts',
+    description: 'Three clickable YouTube thumbnail concepts for a tech review channel.',
+    postedBy: 'Creator Collective',
+    skillsRequired: ['Photoshop', 'Canva'],
+  },
+  {
+    id: 'c5',
+    title: 'Find one trend in this data',
+    description: 'Given a small CSV of signups, find and summarize one interesting trend.',
+    postedBy: 'TechCo',
+    skillsRequired: ['Python', 'SQL'],
+  },
+];
+
+export const sampleReceipts: Receipt[] = [
+  {
+    id: 'r1',
+    challengeId: 'c2',
+    challengeTitle: 'Fix this login bug',
+    completedFor: 'ScaleUp',
+    date: '2 weeks ago',
+    skillsProven: ['React', 'JavaScript'],
+    status: 'verified',
+  },
+  {
+    id: 'r2',
+    challengeId: 'c3',
+    challengeTitle: 'Design a landing page hero',
+    completedFor: 'AppStudio',
+    date: '1 month ago',
+    skillsProven: ['Figma'],
+    status: 'verified',
   },
 ];
 

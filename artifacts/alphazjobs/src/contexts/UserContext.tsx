@@ -1,9 +1,10 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User } from '@/data/mock-data';
+import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
+import { User, Challenge, Receipt } from '@/data/mock-data';
 
 const STORAGE_KEY = 'alphazjobs.user';
 const SAVED_JOBS_KEY = 'alphazjobs.savedJobIds';
 const APPLIED_JOBS_KEY = 'alphazjobs.appliedJobIds';
+const RECEIPTS_KEY = 'alphazjobs.receipts';
 
 interface OnboardingData {
   name: string;
@@ -23,6 +24,8 @@ interface UserContextType {
   appliedJobIds: string[];
   toggleSaveJob: (jobId: string) => void;
   applyToJob: (jobId: string) => void;
+  receipts: Receipt[];
+  submitChallenge: (challenge: Challenge) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -45,11 +48,28 @@ function loadStoredIds(key: string): string[] {
   }
 }
 
+function loadStoredReceipts(): Receipt[] {
+  try {
+    const raw = localStorage.getItem(RECEIPTS_KEY);
+    return raw ? (JSON.parse(raw) as Receipt[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => loadStoredUser());
   const [isOnboarded, setIsOnboarded] = useState(() => loadStoredUser() !== null);
   const [savedJobIds, setSavedJobIds] = useState<string[]>(() => loadStoredIds(SAVED_JOBS_KEY));
   const [appliedJobIds, setAppliedJobIds] = useState<string[]>(() => loadStoredIds(APPLIED_JOBS_KEY));
+  const [receipts, setReceipts] = useState<Receipt[]>(() => loadStoredReceipts());
+  const verifyTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  useEffect(() => {
+    return () => {
+      verifyTimers.current.forEach(clearTimeout);
+    };
+  }, []);
 
   useEffect(() => {
     try {
@@ -79,6 +99,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   }, [appliedJobIds]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem(RECEIPTS_KEY, JSON.stringify(receipts));
+    } catch {
+      // ignore
+    }
+  }, [receipts]);
+
   const toggleSaveJob = (jobId: string) => {
     setSavedJobIds((prev) =>
       prev.includes(jobId) ? prev.filter((id) => id !== jobId) : [...prev, jobId]
@@ -87,6 +115,27 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const applyToJob = (jobId: string) => {
     setAppliedJobIds((prev) => (prev.includes(jobId) ? prev : [...prev, jobId]));
+  };
+
+  const submitChallenge = (challenge: Challenge) => {
+    const receiptId = `receipt-${Date.now()}`;
+    const newReceipt: Receipt = {
+      id: receiptId,
+      challengeId: challenge.id,
+      challengeTitle: challenge.title,
+      completedFor: challenge.postedBy,
+      date: 'Just now',
+      skillsProven: challenge.skillsRequired,
+      status: 'pending',
+    };
+    setReceipts((prev) => [newReceipt, ...prev]);
+
+    const timer = setTimeout(() => {
+      setReceipts((prev) =>
+        prev.map((r) => (r.id === receiptId ? { ...r, status: 'verified' } : r))
+      );
+    }, 4000);
+    verifyTimers.current.push(timer);
   };
 
   const completeOnboarding = (data: OnboardingData) => {
@@ -114,6 +163,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
     appliedJobIds,
     toggleSaveJob,
     applyToJob,
+    receipts,
+    submitChallenge,
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

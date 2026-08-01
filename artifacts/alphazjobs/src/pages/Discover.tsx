@@ -1,19 +1,20 @@
 import { useState } from 'react';
-import { Search, SlidersHorizontal, Briefcase, Users, X } from 'lucide-react';
+import { Search, SlidersHorizontal, Briefcase, Users, Trophy, X } from 'lucide-react';
 import { Link } from 'wouter';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { JobCard } from '@/components/JobCard';
+import { ChallengeCard } from '@/components/ChallengeCard';
 import { UserAvatar } from '@/components/UserAvatar';
 import { BottomNav } from '@/components/BottomNav';
 import { TopNav } from '@/components/TopNav';
-import { jobs, sampleUsers, availableSkills, availableInterests, Job } from '@/data/mock-data';
+import { jobs, sampleUsers, challenges, availableSkills, availableInterests, Job } from '@/data/mock-data';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 
-type TabType = 'jobs' | 'people';
+type TabType = 'jobs' | 'people' | 'challenges';
 type JobType = Job['type'];
 const JOB_TYPES: JobType[] = ['remote', 'hybrid', 'onsite'];
 
@@ -61,7 +62,9 @@ export default function Discover() {
   const activeFilterCount =
     activeTab === 'jobs'
       ? selectedJobTypes.length + selectedSkills.length
-      : selectedSkills.length + selectedInterests.length;
+      : activeTab === 'challenges'
+        ? selectedSkills.length
+        : selectedSkills.length + selectedInterests.length;
 
   const filteredJobs = jobs.filter(
     (job) =>
@@ -73,6 +76,17 @@ export default function Discover() {
       (selectedJobTypes.length === 0 || selectedJobTypes.includes(job.type)) &&
       (selectedSkills.length === 0 ||
         job.skills.some((skill) => selectedSkills.includes(skill)))
+  );
+
+  const filteredChallenges = challenges.filter(
+    (c) =>
+      (c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.postedBy.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.skillsRequired.some((skill) =>
+          skill.toLowerCase().includes(searchQuery.toLowerCase())
+        )) &&
+      (selectedSkills.length === 0 ||
+        c.skillsRequired.some((skill) => selectedSkills.includes(skill)))
   );
 
   // Exclude first entry (Alex Chen / currentUser placeholder)
@@ -97,7 +111,9 @@ export default function Discover() {
           <p className="text-muted-foreground">
             {activeTab === 'jobs'
               ? `${filteredJobs.length} opportunities waiting for you`
-              : `${discoverUsers.length} people to connect with`}
+              : activeTab === 'challenges'
+                ? `${filteredChallenges.length} challenges to prove your skills`
+                : `${discoverUsers.length} people to connect with`}
           </p>
         </div>
 
@@ -127,6 +143,18 @@ export default function Discover() {
             <Users className="w-4 h-4" />
             People
           </button>
+          <button
+            onClick={() => setActiveTab('challenges')}
+            className={cn(
+              'flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all',
+              activeTab === 'challenges'
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            <Trophy className="w-4 h-4" />
+            Challenges
+          </button>
         </div>
 
         {/* Search & Filters */}
@@ -137,7 +165,9 @@ export default function Discover() {
               placeholder={
                 activeTab === 'jobs'
                   ? t.placeholders.searchJobs
-                  : t.placeholders.searchPeople
+                  : activeTab === 'challenges'
+                    ? 'Search challenges, skills...'
+                    : t.placeholders.searchPeople
               }
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -205,6 +235,26 @@ export default function Discover() {
                 </div>
               )}
 
+              {activeTab === 'challenges' && (
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">
+                    Skills
+                  </p>
+                  <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
+                    {availableSkills.map((skill) => (
+                      <Badge
+                        key={skill}
+                        variant={selectedSkills.includes(skill) ? 'default' : 'outline'}
+                        className="cursor-pointer"
+                        onClick={() => toggleSkill(skill)}
+                      >
+                        {skill}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {activeTab === 'people' && (
                 <div className="space-y-4">
                   <div>
@@ -258,6 +308,22 @@ export default function Discover() {
             {filteredJobs.length === 0 && (
               <div className="text-center py-16">
                 <p className="text-muted-foreground">{t.empty.noJobs}</p>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Challenges tab */}
+        {activeTab === 'challenges' && (
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {filteredChallenges.map((challenge, index) => (
+                <ChallengeCard key={challenge.id} challenge={challenge} index={index} />
+              ))}
+            </div>
+            {filteredChallenges.length === 0 && (
+              <div className="text-center py-16">
+                <p className="text-muted-foreground">No challenges found. Try a different search.</p>
               </div>
             )}
           </>
