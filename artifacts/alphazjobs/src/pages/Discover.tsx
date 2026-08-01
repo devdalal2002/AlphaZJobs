@@ -1,18 +1,21 @@
 import { useState } from 'react';
-import { Search, SlidersHorizontal, Briefcase, Users } from 'lucide-react';
+import { Search, SlidersHorizontal, Briefcase, Users, X } from 'lucide-react';
 import { Link } from 'wouter';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { JobCard } from '@/components/JobCard';
 import { UserAvatar } from '@/components/UserAvatar';
 import { BottomNav } from '@/components/BottomNav';
 import { TopNav } from '@/components/TopNav';
-import { jobs, sampleUsers } from '@/data/mock-data';
+import { jobs, sampleUsers, availableSkills, availableInterests, Job } from '@/data/mock-data';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 
 type TabType = 'jobs' | 'people';
+type JobType = Job['type'];
+const JOB_TYPES: JobType[] = ['remote', 'hybrid', 'onsite'];
 
 function getAgeDisplay(age: number): string {
   if (age < 18) {
@@ -26,22 +29,62 @@ export default function Discover() {
   const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<TabType>('jobs');
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [selectedJobTypes, setSelectedJobTypes] = useState<JobType[]>([]);
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+
+  const toggleJobType = (type: JobType) => {
+    setSelectedJobTypes((prev) =>
+      prev.includes(type) ? prev.filter((t2) => t2 !== type) : [...prev, type]
+    );
+  };
+
+  const toggleSkill = (skill: string) => {
+    setSelectedSkills((prev) =>
+      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
+    );
+  };
+
+  const toggleInterest = (interest: string) => {
+    setSelectedInterests((prev) =>
+      prev.includes(interest) ? prev.filter((i) => i !== interest) : [...prev, interest]
+    );
+  };
+
+  const clearFilters = () => {
+    setSelectedJobTypes([]);
+    setSelectedSkills([]);
+    setSelectedInterests([]);
+  };
+
+  const activeFilterCount =
+    activeTab === 'jobs'
+      ? selectedJobTypes.length + selectedSkills.length
+      : selectedSkills.length + selectedInterests.length;
 
   const filteredJobs = jobs.filter(
     (job) =>
-      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.skills.some((skill) =>
-        skill.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      (job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        job.skills.some((skill) =>
+          skill.toLowerCase().includes(searchQuery.toLowerCase())
+        )) &&
+      (selectedJobTypes.length === 0 || selectedJobTypes.includes(job.type)) &&
+      (selectedSkills.length === 0 ||
+        job.skills.some((skill) => selectedSkills.includes(skill)))
   );
 
   // Exclude first entry (Alex Chen / currentUser placeholder)
   const discoverUsers = sampleUsers.slice(1).filter(
     (u) =>
-      u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.skills.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      u.interests.some((i) => i.toLowerCase().includes(searchQuery.toLowerCase()))
+      (u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        u.skills.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        u.interests.some((i) => i.toLowerCase().includes(searchQuery.toLowerCase()))) &&
+      (selectedSkills.length === 0 ||
+        u.skills.some((s) => selectedSkills.includes(s))) &&
+      (selectedInterests.length === 0 ||
+        u.interests.some((i) => selectedInterests.includes(i)))
   );
 
   return (
@@ -101,9 +144,107 @@ export default function Discover() {
               className="pl-10 h-12"
             />
           </div>
-          <Button variant="outline" size="icon" className="h-12 w-12">
-            <SlidersHorizontal className="w-5 h-5" />
-          </Button>
+          <Popover open={filtersOpen} onOpenChange={setFiltersOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="icon" className="h-12 w-12 relative">
+                <SlidersHorizontal className="w-5 h-5" />
+                {activeFilterCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold flex items-center justify-center">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-80">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold">Filters</h3>
+                {activeFilterCount > 0 && (
+                  <Button variant="ghost" size="sm" onClick={clearFilters} className="h-auto py-1 px-2 text-xs gap-1">
+                    <X className="w-3 h-3" />
+                    Clear all
+                  </Button>
+                )}
+              </div>
+
+              {activeTab === 'jobs' && (
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">
+                      Job type
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {JOB_TYPES.map((type) => (
+                        <Badge
+                          key={type}
+                          variant={selectedJobTypes.includes(type) ? 'default' : 'outline'}
+                          className="capitalize cursor-pointer"
+                          onClick={() => toggleJobType(type)}
+                        >
+                          {type}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">
+                      Skills
+                    </p>
+                    <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
+                      {availableSkills.map((skill) => (
+                        <Badge
+                          key={skill}
+                          variant={selectedSkills.includes(skill) ? 'default' : 'outline'}
+                          className="cursor-pointer"
+                          onClick={() => toggleSkill(skill)}
+                        >
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'people' && (
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">
+                      Skills
+                    </p>
+                    <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+                      {availableSkills.map((skill) => (
+                        <Badge
+                          key={skill}
+                          variant={selectedSkills.includes(skill) ? 'default' : 'outline'}
+                          className="cursor-pointer"
+                          onClick={() => toggleSkill(skill)}
+                        >
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">
+                      Interests
+                    </p>
+                    <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+                      {availableInterests.map((interest) => (
+                        <Badge
+                          key={interest}
+                          variant={selectedInterests.includes(interest) ? 'default' : 'outline'}
+                          className="cursor-pointer"
+                          onClick={() => toggleInterest(interest)}
+                        >
+                          {interest}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Jobs tab */}
