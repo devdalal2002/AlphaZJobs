@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { JobCard } from '@/components/JobCard';
 import { UserAvatar } from '@/components/UserAvatar';
 import { BottomNav } from '@/components/BottomNav';
+import { TopNav } from '@/components/TopNav';
 import { jobs, sampleUsers } from '@/data/mock-data';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
@@ -44,7 +45,8 @@ export default function Discover() {
   );
 
   return (
-    <div className="min-h-[100dvh] bg-background pb-20 md:pb-8">
+    <div className="min-h-[100dvh] bg-background pb-20 md:pb-8 md:pt-16">
+      <TopNav />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Header */}
         <div className="mb-8">
@@ -91,8 +93,8 @@ export default function Discover() {
             <Input
               placeholder={
                 activeTab === 'jobs'
-                  ? 'Search jobs, companies, skills...'
-                  : 'Search people, skills, interests...'
+                  ? t.placeholders.searchJobs
+                  : t.placeholders.searchPeople
               }
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -114,7 +116,7 @@ export default function Discover() {
             </div>
             {filteredJobs.length === 0 && (
               <div className="text-center py-16">
-                <p className="text-muted-foreground">No jobs found. Try a different search.</p>
+                <p className="text-muted-foreground">{t.empty.noJobs}</p>
               </div>
             )}
           </>
@@ -170,7 +172,7 @@ export default function Discover() {
             </div>
             {discoverUsers.length === 0 && (
               <div className="text-center py-16">
-                <p className="text-muted-foreground">No people found. Try a different search.</p>
+                <p className="text-muted-foreground">{t.empty.noPeople}</p>
               </div>
             )}
           </>

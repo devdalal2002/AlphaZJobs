@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { BottomNav } from '@/components/BottomNav';
+import { TopNav } from '@/components/TopNav';
 import { rooms, Room, Message } from '@/data/mock-data';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
@@ -48,7 +49,8 @@ export default function Rooms() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-background pb-20 md:pb-8">
+    <div className="min-h-[100dvh] bg-background pb-20 md:pb-8 md:pt-16">
+      <TopNav />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <AnimatePresence mode="wait">
           {!selectedRoom ? (
@@ -60,7 +62,7 @@ export default function Rooms() {
             >
               <h1 className="text-4xl font-black mb-2">{t.nav.rooms}</h1>
               <p className="text-muted-foreground mb-8">
-                Connect with communities that match your vibe
+                {t.headings.roomsSub}
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

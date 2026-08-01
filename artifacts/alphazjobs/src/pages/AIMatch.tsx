@@ -5,6 +5,7 @@ import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { TopNav } from '@/components/TopNav';
 import { jobs, currentUser as fallbackUser } from '@/data/mock-data';
 import { useUser } from '@/contexts/UserContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -81,7 +82,8 @@ export default function AIMatch() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-background">
+    <div className="min-h-[100dvh] bg-background md:pt-16">
+      <TopNav />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
         <div className="flex items-center mb-8">
@@ -112,7 +114,7 @@ export default function AIMatch() {
                 {t.messages.loading}
               </h2>
               <p className="text-muted-foreground text-center animate-pulse">
-                Analyzing your skills and interests...
+                {t.headings.aiMatchAnalyzing}
               </p>
             </motion.div>
           ) : (
@@ -124,7 +126,7 @@ export default function AIMatch() {
             >
               <div className="mb-8">
                 <p className="text-sm text-primary font-semibold mb-1">{t.messages.matchFound}</p>
-                <h1 className="text-4xl font-black mb-2">Your AI Matches</h1>
+                <h1 className="text-4xl font-black mb-2">{t.headings.aiMatchTitle}</h1>
                 <p className="text-muted-foreground">
                   {matches.length} opportunities tailored for {activeUser.name}
                 </p>

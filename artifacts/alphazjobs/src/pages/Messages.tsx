@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { UserAvatar } from '@/components/UserAvatar';
 import { BottomNav } from '@/components/BottomNav';
+import { TopNav } from '@/components/TopNav';
 import { conversations, Message } from '@/data/mock-data';
 import { useUser } from '@/contexts/UserContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -74,7 +75,8 @@ export default function Messages() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-background pb-20 md:pb-8">
+    <div className="min-h-[100dvh] bg-background pb-20 md:pb-8 md:pt-16">
+      <TopNav />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <h1 className="text-4xl font-black mb-8">{t.nav.messages}</h1>
 

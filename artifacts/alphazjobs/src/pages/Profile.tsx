@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { UserAvatar } from '@/components/UserAvatar';
 import { BottomNav } from '@/components/BottomNav';
+import { TopNav } from '@/components/TopNav';
 import { useUser } from '@/contexts/UserContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { currentUser as fallbackUser } from '@/data/mock-data';
@@ -23,7 +24,8 @@ export default function Profile() {
   const isMinor = displayUser.age < 18;
 
   return (
-    <div className="min-h-[100dvh] bg-background pb-20 md:pb-8">
+    <div className="min-h-[100dvh] bg-background pb-20 md:pb-8 md:pt-16">
+      <TopNav />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
@@ -101,7 +103,7 @@ export default function Profile() {
 
         {/* Top Skills */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold mb-4">Top skills</h2>
+          <h2 className="text-xl font-bold mb-4">{t.headings.profileTopSkills}</h2>
           {displayUser.skills.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {displayUser.skills.map((skill) => (
@@ -111,13 +113,18 @@ export default function Profile() {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">No skills added yet. <Link href="/profile/edit"><span className="text-primary underline cursor-pointer">Add some</span></Link></p>
+            <p className="text-sm text-muted-foreground">
+              {t.empty.noSkills}{' '}
+              <Link href="/profile/edit">
+                <span className="text-primary underline cursor-pointer">Add some</span>
+              </Link>
+            </p>
           )}
         </div>
 
         {/* Interests */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold mb-4">Interests</h2>
+          <h2 className="text-xl font-bold mb-4">{t.headings.profileInterests}</h2>
           {displayUser.interests.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {displayUser.interests.map((interest) => (
@@ -127,13 +134,13 @@ export default function Profile() {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">No interests added yet.</p>
+            <p className="text-sm text-muted-foreground">{t.empty.noInterests}</p>
           )}
         </div>
 
         {/* Looking For */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold mb-4">Looking for</h2>
+          <h2 className="text-xl font-bold mb-4">{t.headings.profileLookingFor}</h2>
           <div className="flex flex-wrap gap-2">
             {displayUser.lookingFor.map((item) => (
               <Badge key={item} variant="outline" className="text-sm">
@@ -146,7 +153,7 @@ export default function Profile() {
         {/* Projects */}
         {displayUser.projects.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-xl font-bold mb-4">Sample projects</h2>
+            <h2 className="text-xl font-bold mb-4">{t.headings.profileProjects}</h2>
             <div className="space-y-3">
               {displayUser.projects.map((project, index) => (
                 <div

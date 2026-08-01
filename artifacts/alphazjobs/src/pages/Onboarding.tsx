@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { ProgressIndicator } from '@/components/ProgressIndicator';
 import { SkillSelector } from '@/components/SkillSelector';
 import { useUser } from '@/contexts/UserContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { availableSkills, availableInterests } from '@/data/mock-data';
 
 const TOTAL_STEPS = 5;
@@ -14,6 +15,7 @@ const TOTAL_STEPS = 5;
 export default function Onboarding() {
   const [, setLocation] = useLocation();
   const { completeOnboarding } = useUser();
+  const { t } = useLanguage();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     name: '',
@@ -82,9 +84,9 @@ export default function Onboarding() {
           >
             {currentStep === 1 && (
               <div className="space-y-6">
-                <h2 className="text-3xl font-black">What's your name?</h2>
+                <h2 className="text-3xl font-black">{t.headings.onboarding1Title}</h2>
                 <Input
-                  placeholder="Your name"
+                  placeholder={t.headings.onboarding1Placeholder}
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="text-lg h-14"
@@ -95,10 +97,10 @@ export default function Onboarding() {
 
             {currentStep === 2 && (
               <div className="space-y-6">
-                <h2 className="text-3xl font-black">How old are you?</h2>
+                <h2 className="text-3xl font-black">{t.headings.onboarding2Title}</h2>
                 <Input
                   type="number"
-                  placeholder="Your age"
+                  placeholder={t.headings.onboarding2Placeholder}
                   value={formData.age}
                   onChange={(e) => setFormData({ ...formData, age: e.target.value })}
                   className="text-lg h-14"
@@ -110,8 +112,8 @@ export default function Onboarding() {
             {currentStep === 3 && (
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-3xl font-black mb-2">What are your skills?</h2>
-                  <p className="text-muted-foreground">Select all that apply</p>
+                  <h2 className="text-3xl font-black mb-2">{t.headings.onboarding3Title}</h2>
+                  <p className="text-muted-foreground">{t.headings.onboarding3Sub}</p>
                 </div>
                 <SkillSelector
                   availableSkills={availableSkills}
@@ -124,8 +126,8 @@ export default function Onboarding() {
             {currentStep === 4 && (
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-3xl font-black mb-2">What are you curious about?</h2>
-                  <p className="text-muted-foreground">Your interests help us match you</p>
+                  <h2 className="text-3xl font-black mb-2">{t.headings.onboarding4Title}</h2>
+                  <p className="text-muted-foreground">{t.headings.onboarding4Sub}</p>
                 </div>
                 <SkillSelector
                   availableSkills={availableInterests}
@@ -138,8 +140,8 @@ export default function Onboarding() {
             {currentStep === 5 && (
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-3xl font-black mb-2">Add a profile photo</h2>
-                  <p className="text-muted-foreground">You can skip this for now</p>
+                  <h2 className="text-3xl font-black mb-2">{t.headings.onboarding5Title}</h2>
+                  <p className="text-muted-foreground">{t.headings.onboarding5Sub}</p>
                 </div>
                 <div className="flex items-center justify-center">
                   <div className="w-32 h-32 rounded-full bg-primary/10 border-2 border-dashed border-primary/30 flex items-center justify-center">
@@ -169,7 +171,9 @@ export default function Onboarding() {
             className="gap-2"
             size="lg"
           >
-            {currentStep === TOTAL_STEPS ? 'Get started' : 'Next'}
+            {currentStep === TOTAL_STEPS
+              ? t.headings.onboardingGetStarted
+              : t.headings.onboardingNext}
             <ArrowRight className="w-4 h-4" />
           </Button>
         </div>

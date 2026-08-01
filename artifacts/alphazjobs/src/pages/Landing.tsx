@@ -22,18 +22,17 @@ export default function Landing() {
         >
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary border border-primary/20 rounded-full px-4 py-2 mb-8">
             <Sparkles className="w-4 h-4" />
-            <span className="text-sm font-medium">For Gen Z & Gen Alpha</span>
+            <span className="text-sm font-medium">{t.headings.landingTagline}</span>
           </div>
 
           <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight">
-            Build your career
+            {t.headings.landingHero1}
             <br />
-            <span className="text-primary">your way</span>
+            <span className="text-primary">{t.headings.landingHero2}</span>
           </h1>
 
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-            Content creator. Developer. Designer. Data analyst. All paths are valid.
-            Find opportunities and connect with people like you.
+            {t.headings.landingSub}
           </p>
 
           <Link href="/onboarding">

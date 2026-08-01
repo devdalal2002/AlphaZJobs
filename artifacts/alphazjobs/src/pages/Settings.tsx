@@ -12,11 +12,12 @@ import {
   DialogDescription,
   DialogClose,
 } from '@/components/ui/dialog';
+import { TopNav } from '@/components/TopNav';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUser } from '@/contexts/UserContext';
 
 export default function Settings() {
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const { user } = useUser();
   const isMinor = user ? user.age < 18 : false;
 
@@ -30,7 +31,8 @@ export default function Settings() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-background">
+    <div className="min-h-[100dvh] bg-background md:pt-16">
+      <TopNav />
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         {/* Header */}
         <div className="flex items-center mb-8">
@@ -42,7 +44,7 @@ export default function Settings() {
           </Link>
         </div>
 
-        <h1 className="text-4xl font-black mb-8">Settings</h1>
+        <h1 className="text-4xl font-black mb-8">{t.headings.settingsTitle}</h1>
 
         <div className="space-y-6">
           {/* Minor safety banner */}
@@ -62,7 +64,7 @@ export default function Settings() {
           <div className="bg-card border border-border rounded-lg p-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <Label className="text-base font-semibold">Language Mode</Label>
+                <Label className="text-base font-semibold">{t.headings.settingsLangMode}</Label>
                 <p className="text-sm text-muted-foreground">
                   {isChronicallyOnline
                     ? 'English (Chronically Online)'
@@ -77,9 +79,9 @@ export default function Settings() {
           <div className="bg-card border border-border rounded-lg p-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <Label className="text-base font-semibold">Notifications</Label>
+                <Label className="text-base font-semibold">{t.headings.settingsNotifications}</Label>
                 <p className="text-sm text-muted-foreground">
-                  Get notified about new matches and messages
+                  {t.headings.settingsNotificationsSub}
                 </p>
               </div>
               <Switch defaultChecked />
@@ -88,7 +90,7 @@ export default function Settings() {
 
           {/* Profile Settings */}
           <div className="bg-card border border-border rounded-lg p-6">
-            <h3 className="text-lg font-semibold mb-4">Profile Settings</h3>
+            <h3 className="text-lg font-semibold mb-4">{t.headings.settingsProfileSection}</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between py-2 border-b border-border">
                 <span className="text-sm">Email</span>
@@ -129,7 +131,7 @@ export default function Settings() {
 
           {/* About */}
           <div className="bg-card border border-border rounded-lg p-6">
-            <h3 className="text-lg font-semibold mb-2">About AlphaZJobs</h3>
+            <h3 className="text-lg font-semibold mb-2">{t.headings.settingsAbout}</h3>
             <p className="text-sm text-muted-foreground mb-4">
               Version 1.0.0 · Made for Gen Z & Gen Alpha
             </p>
