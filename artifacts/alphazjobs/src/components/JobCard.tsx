@@ -1,10 +1,10 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin } from 'lucide-react';
 import { Job } from '@/data/mock-data';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
 
 interface JobCardProps {
@@ -15,11 +15,12 @@ interface JobCardProps {
 export function JobCard({ job, index }: JobCardProps) {
   const { t } = useLanguage();
   const { toast } = useToast();
-  const [applied, setApplied] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const { savedJobIds, appliedJobIds, toggleSaveJob, applyToJob } = useUser();
+  const saved = savedJobIds.includes(job.id);
+  const applied = appliedJobIds.includes(job.id);
 
   const handleApply = () => {
-    setApplied(true);
+    applyToJob(job.id);
     toast({
       title: 'Applied!',
       description: `Your application for ${job.title} at ${job.company} has been sent.`,
@@ -27,11 +28,12 @@ export function JobCard({ job, index }: JobCardProps) {
   };
 
   const handleSave = () => {
-    setSaved(true);
-    toast({
-      title: 'Saved to your list',
-      description: `${job.title} saved. Find it in your profile.`,
-    });
+    toggleSaveJob(job.id);
+    toast(
+      saved
+        ? { title: 'Removed from saved', description: `${job.title} removed from your list.` }
+        : { title: 'Saved to your list', description: `${job.title} saved. Find it in your profile.` }
+    );
   };
 
   return (
@@ -76,7 +78,6 @@ export function JobCard({ job, index }: JobCardProps) {
             size="sm"
             variant={saved ? 'default' : 'outline'}
             onClick={handleSave}
-            disabled={saved}
           >
             {saved ? 'Saved' : t.buttons.save}
           </Button>

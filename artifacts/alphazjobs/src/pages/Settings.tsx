@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, ShieldCheck, Lock } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, Lock, Sun, Moon } from 'lucide-react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -15,19 +15,26 @@ import {
 import { TopNav } from '@/components/TopNav';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUser } from '@/contexts/UserContext';
+import { useTheme } from '@/contexts/ThemeProvider';
 
 export default function Settings() {
   const { language, setLanguage, t } = useLanguage();
   const { user } = useUser();
+  const { theme, setTheme } = useTheme();
   const isMinor = user ? user.age < 18 : false;
 
   const isChronicallyOnline = language === 'en-chronically-online';
+  const isDark = theme === 'dark';
 
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
 
   const handleLanguageToggle = () => {
     setLanguage(isChronicallyOnline ? 'en-us' : 'en-chronically-online');
+  };
+
+  const handleThemeToggle = () => {
+    setTheme(isDark ? 'light' : 'dark');
   };
 
   return (
@@ -59,6 +66,22 @@ export default function Settings() {
               </div>
             </div>
           )}
+
+          {/* Theme Toggle */}
+          <div className="bg-card border border-border rounded-lg p-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <Label className="text-base font-semibold flex items-center gap-2">
+                  {isDark ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                  Appearance
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  {isDark ? 'Dark mode' : 'Light mode'}
+                </p>
+              </div>
+              <Switch checked={isDark} onCheckedChange={handleThemeToggle} />
+            </div>
+          </div>
 
           {/* Language Toggle */}
           <div className="bg-card border border-border rounded-lg p-6">

@@ -1,5 +1,5 @@
 import { Link } from 'wouter';
-import { Edit, Sparkles, ExternalLink, Settings, ShieldCheck } from 'lucide-react';
+import { Edit, Sparkles, ExternalLink, Settings, ShieldCheck, Bookmark, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { UserAvatar } from '@/components/UserAvatar';
@@ -7,7 +7,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { TopNav } from '@/components/TopNav';
 import { useUser } from '@/contexts/UserContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { currentUser as fallbackUser } from '@/data/mock-data';
+import { currentUser as fallbackUser, jobs } from '@/data/mock-data';
 
 function getAgeDisplay(age: number): string {
   if (age < 18) {
@@ -19,9 +19,11 @@ function getAgeDisplay(age: number): string {
 
 export default function Profile() {
   const { t } = useLanguage();
-  const { user } = useUser();
+  const { user, savedJobIds, appliedJobIds, toggleSaveJob } = useUser();
   const displayUser = user ?? fallbackUser;
   const isMinor = displayUser.age < 18;
+  const trackedJobIds = Array.from(new Set([...savedJobIds, ...appliedJobIds]));
+  const trackedJobs = jobs.filter((job) => trackedJobIds.includes(job.id));
 
   return (
     <div className="min-h-[100dvh] bg-background pb-20 md:pb-8 md:pt-16">
@@ -100,6 +102,57 @@ export default function Profile() {
             </div>
           </div>
         </Link>
+
+        {/* Saved / Applied Jobs */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <Bookmark className="w-5 h-5 text-primary" />
+            Saved jobs
+          </h2>
+          {trackedJobs.length > 0 ? (
+            <div className="space-y-3">
+              {trackedJobs.map((job) => {
+                const isApplied = appliedJobIds.includes(job.id);
+                const isSaved = savedJobIds.includes(job.id);
+                return (
+                  <div
+                    key={job.id}
+                    className="bg-card border border-border rounded-lg p-4 flex items-start justify-between gap-4"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <h3 className="font-semibold truncate">{job.title}</h3>
+                        {isApplied && (
+                          <Badge variant="outline" className="text-xs">Applied</Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">{job.company}</p>
+                      <p className="text-sm font-semibold text-primary mt-1">{job.compensation}</p>
+                    </div>
+                    {isSaved && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0"
+                        onClick={() => toggleSaveJob(job.id)}
+                        aria-label="Remove from saved"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No saved jobs yet.{' '}
+              <Link href="/discover">
+                <span className="text-primary underline cursor-pointer">Browse opportunities</span>
+              </Link>
+            </p>
+          )}
+        </div>
 
         {/* Top Skills */}
         <div className="mb-8">

@@ -13,14 +13,12 @@ import { useToast } from '@/hooks/use-toast';
 
 export default function AIMatch() {
   const { t } = useLanguage();
-  const { user } = useUser();
+  const { user, savedJobIds, appliedJobIds, toggleSaveJob, applyToJob } = useUser();
   const { toast } = useToast();
   const activeUser = user ?? fallbackUser;
 
   const [isLoading, setIsLoading] = useState(true);
   const [matches, setMatches] = useState<Array<{ job: typeof jobs[0]; match: number; reason: string }>>([]);
-  const [applied, setApplied] = useState<Record<string, boolean>>({});
-  const [saved, setSaved] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -72,13 +70,18 @@ export default function AIMatch() {
   }, [activeUser]);
 
   const handleApply = (jobId: string, jobTitle: string) => {
-    setApplied((prev) => ({ ...prev, [jobId]: true }));
+    applyToJob(jobId);
     toast({ title: 'Applied!', description: `Application sent for ${jobTitle}.` });
   };
 
   const handleSave = (jobId: string, jobTitle: string) => {
-    setSaved((prev) => ({ ...prev, [jobId]: true }));
-    toast({ title: 'Saved to your list', description: `${jobTitle} saved.` });
+    const wasSaved = savedJobIds.includes(jobId);
+    toggleSaveJob(jobId);
+    toast(
+      wasSaved
+        ? { title: 'Removed from saved', description: `${jobTitle} removed from your list.` }
+        : { title: 'Saved to your list', description: `${jobTitle} saved.` }
+    );
   };
 
   return (
@@ -187,19 +190,18 @@ export default function AIMatch() {
                       <div className="flex gap-2">
                         <Button
                           size="sm"
-                          variant={saved[match.job.id] ? 'default' : 'outline'}
+                          variant={savedJobIds.includes(match.job.id) ? 'default' : 'outline'}
                           onClick={() => handleSave(match.job.id, match.job.title)}
-                          disabled={saved[match.job.id]}
                         >
-                          {saved[match.job.id] ? 'Saved' : t.buttons.save}
+                          {savedJobIds.includes(match.job.id) ? 'Saved' : t.buttons.save}
                         </Button>
                         <Button
                           size="sm"
                           onClick={() => handleApply(match.job.id, match.job.title)}
-                          disabled={applied[match.job.id]}
-                          variant={applied[match.job.id] ? 'outline' : 'default'}
+                          disabled={appliedJobIds.includes(match.job.id)}
+                          variant={appliedJobIds.includes(match.job.id) ? 'outline' : 'default'}
                         >
-                          {applied[match.job.id] ? 'Applied' : t.buttons.apply}
+                          {appliedJobIds.includes(match.job.id) ? 'Applied' : t.buttons.apply}
                         </Button>
                       </div>
                     </div>
