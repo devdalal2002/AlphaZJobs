@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Tag } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { Job } from '@/data/mock-data';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface JobCardProps {
   job: Job;
@@ -12,6 +14,25 @@ interface JobCardProps {
 
 export function JobCard({ job, index }: JobCardProps) {
   const { t } = useLanguage();
+  const { toast } = useToast();
+  const [applied, setApplied] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const handleApply = () => {
+    setApplied(true);
+    toast({
+      title: 'Applied!',
+      description: `Your application for ${job.title} at ${job.company} has been sent.`,
+    });
+  };
+
+  const handleSave = () => {
+    setSaved(true);
+    toast({
+      title: 'Saved to your list',
+      description: `${job.title} saved. Find it in your profile.`,
+    });
+  };
 
   return (
     <motion.div
@@ -51,10 +72,22 @@ export function JobCard({ job, index }: JobCardProps) {
           )}
         </div>
         <div className="flex gap-2">
-          <Button size="sm" variant="outline">
-            {t.buttons.save}
+          <Button
+            size="sm"
+            variant={saved ? 'default' : 'outline'}
+            onClick={handleSave}
+            disabled={saved}
+          >
+            {saved ? 'Saved' : t.buttons.save}
           </Button>
-          <Button size="sm">{t.buttons.apply}</Button>
+          <Button
+            size="sm"
+            onClick={handleApply}
+            disabled={applied}
+            variant={applied ? 'outline' : 'default'}
+          >
+            {applied ? 'Applied' : t.buttons.apply}
+          </Button>
         </div>
       </div>
     </motion.div>

@@ -1,11 +1,19 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
-import { currentUser as defaultUser, User } from '@/data/mock-data';
+import { User } from '@/data/mock-data';
+
+interface OnboardingData {
+  name: string;
+  age: number;
+  bio: string;
+  skills: string[];
+  interests: string[];
+}
 
 interface UserContextType {
   user: User | null;
   setUser: (user: User | null) => void;
   isOnboarded: boolean;
-  completeOnboarding: () => void;
+  completeOnboarding: (data: OnboardingData) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -14,8 +22,18 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isOnboarded, setIsOnboarded] = useState(false);
 
-  const completeOnboarding = () => {
-    setUser(defaultUser);
+  const completeOnboarding = (data: OnboardingData) => {
+    const newUser: User = {
+      id: 'current-user',
+      name: data.name,
+      age: data.age,
+      bio: data.bio,
+      skills: data.skills,
+      interests: data.interests,
+      lookingFor: ['Internship', 'Freelance gig', 'Mentorship'],
+      projects: [],
+    };
+    setUser(newUser);
     setIsOnboarded(true);
   };
 

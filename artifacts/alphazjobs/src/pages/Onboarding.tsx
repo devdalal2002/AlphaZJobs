@@ -26,7 +26,17 @@ export default function Onboarding() {
     if (currentStep < TOTAL_STEPS) {
       setCurrentStep((prev) => prev + 1);
     } else {
-      completeOnboarding();
+      const bio =
+        formData.skills.length > 0
+          ? `${formData.skills[0]} enthusiast`
+          : 'aspiring creator';
+      completeOnboarding({
+        name: formData.name,
+        age: Number(formData.age),
+        bio,
+        skills: formData.skills,
+        interests: formData.interests,
+      });
       setLocation('/discover');
     }
   };

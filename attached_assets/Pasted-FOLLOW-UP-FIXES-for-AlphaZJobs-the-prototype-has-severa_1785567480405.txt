@@ -1,0 +1,24 @@
+FOLLOW-UP FIXES for AlphaZJobs — the prototype has several dead/fake interactions that need to be made real (using local React state only, still no backend). Fix in this priority order:
+
+1. WIRE ONBOARDING TO THE ACTUAL PROFILE (highest priority — this is currently fully broken)
+
+Right now UserContext.tsx's completeOnboarding() ignores everything typed in onboarding and just loads the hardcoded "Alex Chen" object from mock-data. Fix it to build the User object from the onboarding form's actual name/age/skills/interests instead of discarding them.
+Profile.tsx currently imports currentUser directly from mock-data instead of reading from UserContext. Change it to read the logged-in user from useUser() so the profile reflects what was entered during onboarding.
+Result: someone who signs up as themselves should see their own name/age/skills/interests on their profile, not "Alex Chen, 17."
+2. MAKE PROFILE EDITING PERSIST
+
+ProfileEdit.tsx's handleSave() currently just shows a toast and navigates away without saving formData anywhere. Wire it to actually update the user in UserContext (setUser) so edits persist for the rest of the session.
+3. MAKE DMs AND ROOMS ACTUALLY SEND MESSAGES
+
+In Messages.tsx and Rooms.tsx, handleSendMessage() currently only clears the input and does nothing else. Make it append the new message to that conversation/room's message list in local state (mark it isMe: true) so it actually appears in the thread immediately after sending.
+4. MAKE "APPLY" AND "SAVE" BUTTONS DO SOMETHING
+
+JobCard.tsx and AIMatch.tsx have Apply/Save buttons with no onClick handlers at all. Add simple local state (e.g. a "saved jobs" list in context, or per-card applied/saved status) and a toast confirmation ("Applied!" / "Saved to your list") when clicked, so the buttons aren't dead ends.
+5. ADD A MINIMAL "DISCOVER PEOPLE" VIEW
+
+mock-data.ts already has sampleUsers (Jordan Kim, Sam Rivera) but nothing ever renders them. Add a simple People tab or section on the Discover page showing other users as cards (name, age, top skills, interests, "Message" button) — this is required by the challenge brief's "discovery" capability, which currently only covers job listings.
+6. ADD GEN ALPHA / MINOR-SAFETY CONSIDERATIONS (required by the brief, currently absent)
+
+If a user's age is under 18 during onboarding, show a short note explaining a restricted mode: e.g. hide exact age (show an age range badge instead of the number), disable/hide DMs from users who aren't in a shared Room, and add a "Only mentors and verified employers can message minors directly" note in Settings.
+Make the Privacy/Account "Manage" buttons in Settings.tsx open a simple dialog/sheet listing what's restricted for minor accounts (mock content is fine, it doesn't need to be fully functional — it just needs to visibly exist since this is a graded requirement).
+Keep everything client-side/local state, no real backend or auth — same constraints as the original build. Don't refactor unrelated code or add new dependencies unless necessary.

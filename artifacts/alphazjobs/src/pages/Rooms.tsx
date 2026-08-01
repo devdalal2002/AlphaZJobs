@@ -5,19 +5,46 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { BottomNav } from '@/components/BottomNav';
-import { rooms, Room } from '@/data/mock-data';
+import { rooms, Room, Message } from '@/data/mock-data';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+
+type RoomMessages = Record<string, Message[]>;
+
+function formatTime(): string {
+  return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
 
 export default function Rooms() {
   const { t } = useLanguage();
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [messageInput, setMessageInput] = useState('');
 
+  // Store mutable messages per room, initialized from mock data
+  const [roomMessages, setRoomMessages] = useState<RoomMessages>(() =>
+    Object.fromEntries(rooms.map((r) => [r.id, [...r.messages]]))
+  );
+
+  const currentMessages = selectedRoom ? (roomMessages[selectedRoom.id] ?? []) : [];
+
   const handleSendMessage = () => {
-    if (messageInput.trim()) {
-      setMessageInput('');
-    }
+    const text = messageInput.trim();
+    if (!text || !selectedRoom) return;
+
+    const newMsg: Message = {
+      id: String(Date.now()),
+      sender: 'You',
+      content: text,
+      timestamp: formatTime(),
+      isMe: true,
+    };
+
+    setRoomMessages((prev) => ({
+      ...prev,
+      [selectedRoom.id]: [...(prev[selectedRoom.id] ?? []), newMsg],
+    }));
+
+    setMessageInput('');
   };
 
   return (
@@ -66,7 +93,7 @@ export default function Rooms() {
 
                     <div className="bg-muted rounded-lg p-3 mb-4">
                       <p className="text-xs text-muted-foreground mb-1">
-                        @{room.recentMessageAuthor}
+                        {room.recentMessageAuthor}
                       </p>
                       <p className="text-sm">{room.recentMessage}</p>
                     </div>
@@ -108,7 +135,7 @@ export default function Rooms() {
               {/* Messages */}
               <div className="flex-1 bg-card border border-border rounded-lg p-6 overflow-y-auto mb-4">
                 <div className="space-y-4">
-                  {selectedRoom.messages.map((message) => (
+                  {currentMessages.map((message) => (
                     <div
                       key={message.id}
                       className={cn(

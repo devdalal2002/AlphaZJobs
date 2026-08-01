@@ -1,14 +1,26 @@
 import { Link } from 'wouter';
-import { Edit, Sparkles, ExternalLink, Settings } from 'lucide-react';
+import { Edit, Sparkles, ExternalLink, Settings, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { UserAvatar } from '@/components/UserAvatar';
 import { BottomNav } from '@/components/BottomNav';
-import { currentUser } from '@/data/mock-data';
+import { useUser } from '@/contexts/UserContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { currentUser as fallbackUser } from '@/data/mock-data';
+
+function getAgeDisplay(age: number): string {
+  if (age < 18) {
+    const lower = Math.floor(age / 2) * 2;
+    return `${lower}-${lower + 1}`;
+  }
+  return String(age);
+}
 
 export default function Profile() {
   const { t } = useLanguage();
+  const { user } = useUser();
+  const displayUser = user ?? fallbackUser;
+  const isMinor = displayUser.age < 18;
 
   return (
     <div className="min-h-[100dvh] bg-background pb-20 md:pb-8">
@@ -16,12 +28,25 @@ export default function Profile() {
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
           <div className="flex items-start gap-4">
-            <UserAvatar name={currentUser.name} className="w-20 h-20 text-2xl" />
+            <UserAvatar name={displayUser.name} className="w-20 h-20 text-2xl" />
             <div>
-              <h1 className="text-3xl font-black">{currentUser.name}</h1>
-              <p className="text-muted-foreground">
-                {currentUser.age} · {currentUser.bio}
-              </p>
+              <h1 className="text-3xl font-black">{displayUser.name}</h1>
+              <div className="flex items-center gap-2 mt-1">
+                {isMinor ? (
+                  <Badge variant="secondary" className="text-xs font-semibold">
+                    {getAgeDisplay(displayUser.age)}
+                  </Badge>
+                ) : (
+                  <span className="text-muted-foreground">{displayUser.age}</span>
+                )}
+                <span className="text-muted-foreground">· {displayUser.bio}</span>
+              </div>
+              {isMinor && (
+                <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
+                  <ShieldCheck className="w-3 h-3 text-primary" />
+                  <span>Protected mode active</span>
+                </div>
+              )}
             </div>
           </div>
           <div className="flex gap-2">
@@ -38,6 +63,23 @@ export default function Profile() {
             </Link>
           </div>
         </div>
+
+        {/* Minor safety notice */}
+        {isMinor && (
+          <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-6 flex items-start gap-3">
+            <ShieldCheck className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold mb-1">Restricted mode is on</p>
+              <p className="text-xs text-muted-foreground">
+                Only mentors and verified employers can message you directly. Your exact age is hidden — a range is shown instead. You can manage these settings in{' '}
+                <Link href="/settings">
+                  <span className="text-primary underline cursor-pointer">Settings</span>
+                </Link>
+                .
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* AI Match CTA */}
         <Link href="/ai-match">
@@ -60,32 +102,40 @@ export default function Profile() {
         {/* Top Skills */}
         <div className="mb-8">
           <h2 className="text-xl font-bold mb-4">Top skills</h2>
-          <div className="flex flex-wrap gap-2">
-            {currentUser.skills.map((skill) => (
-              <Badge key={skill} variant="default" className="text-sm">
-                {skill}
-              </Badge>
-            ))}
-          </div>
+          {displayUser.skills.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {displayUser.skills.map((skill) => (
+                <Badge key={skill} variant="default" className="text-sm">
+                  {skill}
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No skills added yet. <Link href="/profile/edit"><span className="text-primary underline cursor-pointer">Add some</span></Link></p>
+          )}
         </div>
 
         {/* Interests */}
         <div className="mb-8">
           <h2 className="text-xl font-bold mb-4">Interests</h2>
-          <div className="flex flex-wrap gap-2">
-            {currentUser.interests.map((interest) => (
-              <Badge key={interest} variant="secondary" className="text-sm">
-                {interest}
-              </Badge>
-            ))}
-          </div>
+          {displayUser.interests.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {displayUser.interests.map((interest) => (
+                <Badge key={interest} variant="secondary" className="text-sm">
+                  {interest}
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No interests added yet.</p>
+          )}
         </div>
 
         {/* Looking For */}
         <div className="mb-8">
           <h2 className="text-xl font-bold mb-4">Looking for</h2>
           <div className="flex flex-wrap gap-2">
-            {currentUser.lookingFor.map((item) => (
+            {displayUser.lookingFor.map((item) => (
               <Badge key={item} variant="outline" className="text-sm">
                 {item}
               </Badge>
@@ -94,19 +144,21 @@ export default function Profile() {
         </div>
 
         {/* Projects */}
-        <div className="mb-8">
-          <h2 className="text-xl font-bold mb-4">Sample projects</h2>
-          <div className="space-y-3">
-            {currentUser.projects.map((project, index) => (
-              <div
-                key={index}
-                className="bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-all"
-              >
-                <p className="text-sm font-medium">{project}</p>
-              </div>
-            ))}
+        {displayUser.projects.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-xl font-bold mb-4">Sample projects</h2>
+            <div className="space-y-3">
+              {displayUser.projects.map((project, index) => (
+                <div
+                  key={index}
+                  className="bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-all"
+                >
+                  <p className="text-sm font-medium">{project}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <BottomNav />

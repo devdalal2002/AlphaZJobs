@@ -5,18 +5,25 @@ import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { jobs, currentUser } from '@/data/mock-data';
+import { jobs, currentUser as fallbackUser } from '@/data/mock-data';
+import { useUser } from '@/contexts/UserContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useToast } from '@/hooks/use-toast';
 
 export default function AIMatch() {
   const { t } = useLanguage();
+  const { user } = useUser();
+  const { toast } = useToast();
+  const activeUser = user ?? fallbackUser;
+
   const [isLoading, setIsLoading] = useState(true);
   const [matches, setMatches] = useState<Array<{ job: typeof jobs[0]; match: number; reason: string }>>([]);
+  const [applied, setApplied] = useState<Record<string, boolean>>({});
+  const [saved, setSaved] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      // Simulate AI matching based on user skills
-      const userSkills = currentUser.skills;
+      const userSkills = activeUser.skills;
       const jobMatches = jobs
         .map((job) => {
           const matchingSkills = job.skills.filter((skill) =>
@@ -24,14 +31,27 @@ export default function AIMatch() {
           );
           const matchPercentage = Math.min(
             95,
-            Math.max(60, (matchingSkills.length / job.skills.length) * 100)
+            Math.max(
+              55,
+              matchingSkills.length > 0
+                ? (matchingSkills.length / job.skills.length) * 100
+                : 55 + Math.random() * 15
+            )
           );
 
           let reason = '';
           if (matchingSkills.length > 0) {
-            reason = `Your ${matchingSkills.join(', ')} skills + interest in ${currentUser.interests[0]} = perfect fit`;
+            const interestPart =
+              activeUser.interests.length > 0
+                ? ` + interest in ${activeUser.interests[0]}`
+                : '';
+            reason = `Your ${matchingSkills.join(' & ')} skills${interestPart} = perfect fit`;
           } else {
-            reason = `Your interests in ${currentUser.interests[0]} align with this role`;
+            const interestPart =
+              activeUser.interests.length > 0
+                ? activeUser.interests[0]
+                : 'your areas';
+            reason = `Your interests in ${interestPart} align with this role`;
           }
 
           return {
@@ -48,7 +68,17 @@ export default function AIMatch() {
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [activeUser]);
+
+  const handleApply = (jobId: string, jobTitle: string) => {
+    setApplied((prev) => ({ ...prev, [jobId]: true }));
+    toast({ title: 'Applied!', description: `Application sent for ${jobTitle}.` });
+  };
+
+  const handleSave = (jobId: string, jobTitle: string) => {
+    setSaved((prev) => ({ ...prev, [jobId]: true }));
+    toast({ title: 'Saved to your list', description: `${jobTitle} saved.` });
+  };
 
   return (
     <div className="min-h-[100dvh] bg-background">
@@ -74,11 +104,14 @@ export default function AIMatch() {
             >
               <div className="relative mb-8">
                 <div className="w-24 h-24 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-14 h-14 rounded-full border-4 border-primary/10 border-b-primary/50 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.8s' }} />
+                </div>
               </div>
-              <h2 className="text-2xl font-black mb-4 text-center animate-shimmer bg-clip-text">
+              <h2 className="text-2xl font-black mb-4 text-center">
                 {t.messages.loading}
               </h2>
-              <p className="text-muted-foreground text-center">
+              <p className="text-muted-foreground text-center animate-pulse">
                 Analyzing your skills and interests...
               </p>
             </motion.div>
@@ -90,9 +123,10 @@ export default function AIMatch() {
               transition={{ duration: 0.4 }}
             >
               <div className="mb-8">
+                <p className="text-sm text-primary font-semibold mb-1">{t.messages.matchFound}</p>
                 <h1 className="text-4xl font-black mb-2">Your AI Matches</h1>
                 <p className="text-muted-foreground">
-                  {matches.length} opportunities tailored for you
+                  {matches.length} opportunities tailored for {activeUser.name}
                 </p>
               </div>
 
@@ -127,7 +161,7 @@ export default function AIMatch() {
                       {match.job.skills.map((skill) => (
                         <Badge
                           key={skill}
-                          variant={currentUser.skills.includes(skill) ? 'default' : 'secondary'}
+                          variant={activeUser.skills.includes(skill) ? 'default' : 'secondary'}
                           className="text-xs"
                         >
                           {skill}
@@ -149,10 +183,22 @@ export default function AIMatch() {
                         {match.job.compensation}
                       </span>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline">
-                          {t.buttons.save}
+                        <Button
+                          size="sm"
+                          variant={saved[match.job.id] ? 'default' : 'outline'}
+                          onClick={() => handleSave(match.job.id, match.job.title)}
+                          disabled={saved[match.job.id]}
+                        >
+                          {saved[match.job.id] ? 'Saved' : t.buttons.save}
                         </Button>
-                        <Button size="sm">{t.buttons.apply}</Button>
+                        <Button
+                          size="sm"
+                          onClick={() => handleApply(match.job.id, match.job.title)}
+                          disabled={applied[match.job.id]}
+                          variant={applied[match.job.id] ? 'outline' : 'default'}
+                        >
+                          {applied[match.job.id] ? 'Applied' : t.buttons.apply}
+                        </Button>
                       </div>
                     </div>
                   </motion.div>

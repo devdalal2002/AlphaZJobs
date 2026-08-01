@@ -5,21 +5,34 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { SkillSelector } from '@/components/SkillSelector';
-import { currentUser, availableSkills, availableInterests } from '@/data/mock-data';
+import { availableSkills, availableInterests, currentUser as fallbackUser } from '@/data/mock-data';
+import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
 
 export default function ProfileEdit() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { user, setUser } = useUser();
+  const displayUser = user ?? fallbackUser;
+
   const [formData, setFormData] = useState({
-    name: currentUser.name,
-    age: currentUser.age.toString(),
-    bio: currentUser.bio,
-    skills: currentUser.skills,
-    interests: currentUser.interests,
+    name: displayUser.name,
+    age: displayUser.age.toString(),
+    bio: displayUser.bio,
+    skills: displayUser.skills,
+    interests: displayUser.interests,
   });
 
   const handleSave = () => {
+    const updatedUser = {
+      ...displayUser,
+      name: formData.name,
+      age: Number(formData.age),
+      bio: formData.bio,
+      skills: formData.skills,
+      interests: formData.interests,
+    };
+    setUser(updatedUser);
     toast({
       title: 'Profile updated',
       description: 'Your changes have been saved.',
