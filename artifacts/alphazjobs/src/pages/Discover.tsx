@@ -332,11 +332,24 @@ export default function Discover() {
             </div>
 
             {jobsViewMode === 'swipe' && (
-              <div className="md:hidden">
-                <SwipeJobStack
-                  key={`${searchQuery}|${selectedJobTypes.join(',')}|${selectedSkills.join(',')}`}
-                  jobs={filteredJobs}
-                />
+              <div className="md:hidden fixed inset-0 z-[60] bg-background flex flex-col">
+                <div className="flex items-center justify-between p-4 border-b border-border">
+                  <h2 className="font-bold text-lg">Swipe jobs</h2>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setJobsViewMode('list')}
+                    aria-label="Close swipe mode"
+                  >
+                    <X className="w-5 h-5" />
+                  </Button>
+                </div>
+                <div className="flex-1 p-4 min-h-0">
+                  <SwipeJobStack
+                    key={`${searchQuery}|${selectedJobTypes.join(',')}|${selectedSkills.join(',')}`}
+                    jobs={filteredJobs}
+                  />
+                </div>
               </div>
             )}
 

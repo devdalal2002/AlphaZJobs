@@ -170,7 +170,7 @@ export function SwipeJobStack({ jobs }: SwipeJobStackProps) {
 
   if (!currentJob) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
+      <div className="h-full flex flex-col items-center justify-center text-center">
         <p className="text-muted-foreground mb-4">
           You've seen all {jobs.length} jobs. Try adjusting your filters, or start over.
         </p>
@@ -183,9 +183,9 @@ export function SwipeJobStack({ jobs }: SwipeJobStackProps) {
   }
 
   return (
-    <div>
+    <div className="h-full">
       <div
-        className="relative h-[520px]"
+        className="relative h-full"
         style={{ overscrollBehaviorY: 'contain' }}
       >
         {nextJob && (
