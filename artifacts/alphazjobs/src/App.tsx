@@ -10,6 +10,7 @@ import Landing from '@/pages/Landing';
 import Onboarding from '@/pages/Onboarding';
 import Discover from '@/pages/Discover';
 import Profile from '@/pages/Profile';
+import PersonProfile from '@/pages/PersonProfile';
 import ProfileEdit from '@/pages/ProfileEdit';
 import AIMatch from '@/pages/AIMatch';
 import Messages from '@/pages/Messages';
@@ -25,6 +26,7 @@ function Router() {
       <Route path="/onboarding" component={Onboarding} />
       <Route path="/discover" component={Discover} />
       <Route path="/profile" component={Profile} />
+      <Route path="/people/:id" component={PersonProfile} />
       <Route path="/profile/edit" component={ProfileEdit} />
       <Route path="/ai-match" component={AIMatch} />
       <Route path="/messages" component={Messages} />

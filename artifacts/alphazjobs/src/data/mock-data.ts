@@ -25,6 +25,7 @@ export interface User {
   projects: string[];
   avatar?: string;
   platformIntegrations?: PlatformIntegration[];
+  receipts?: Receipt[];
 }
 
 export interface Message {
@@ -192,6 +193,18 @@ export const sampleUsers: User[] = [
     interests: ['Collabs', 'Brand deals'],
     lookingFor: ['Brand partnerships', 'Collaborations'],
     projects: ['TikTok series on productivity', 'YouTube channel'],
+    platformIntegrations: [{ platform: 'tiktok', handle: 'jordan.creates' }],
+    receipts: [
+      {
+        id: 'jk-r1',
+        challengeId: 'c1',
+        challengeTitle: 'Edit this 30s reel',
+        completedFor: '@jenna.creates',
+        date: '3 weeks ago',
+        skillsProven: ['Video Editing', 'Trending Audio'],
+        status: 'verified',
+      },
+    ],
   },
   {
     id: 'sam-rivera',
@@ -202,6 +215,21 @@ export const sampleUsers: User[] = [
     interests: ['Design systems', 'Accessibility'],
     lookingFor: ['Design internship', 'Portfolio reviews'],
     projects: ['Design system for startup', 'Accessibility toolkit'],
+    platformIntegrations: [
+      { platform: 'figma', handle: 'samrivera' },
+      { platform: 'dribbble', handle: 'samrivera' },
+    ],
+    receipts: [
+      {
+        id: 'sr-r1',
+        challengeId: 'c3',
+        challengeTitle: 'Design a landing page hero',
+        completedFor: 'AppStudio',
+        date: '2 weeks ago',
+        skillsProven: ['Figma'],
+        status: 'verified',
+      },
+    ],
   },
 ];
 

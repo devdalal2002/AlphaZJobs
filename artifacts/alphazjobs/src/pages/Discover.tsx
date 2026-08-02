@@ -414,7 +414,7 @@ export default function Discover() {
                     ))}
                   </div>
 
-                  <div className="flex flex-wrap gap-1.5 mb-4">
+                  <div className="flex flex-wrap gap-1.5 mb-3">
                     {person.interests.slice(0, 2).map((interest) => (
                       <Badge key={interest} variant="secondary" className="text-xs">
                         {interest}
@@ -422,11 +422,25 @@ export default function Discover() {
                     ))}
                   </div>
 
-                  <Link href="/messages">
-                    <Button variant="outline" size="sm" className="w-full">
-                      Message
-                    </Button>
-                  </Link>
+                  {person.receipts && person.receipts.length > 0 && (
+                    <p className="flex items-center gap-1 text-xs text-primary font-medium mb-4">
+                      <Trophy className="w-3.5 h-3.5" />
+                      {person.receipts.length} Receipt{person.receipts.length > 1 ? 's' : ''}
+                    </p>
+                  )}
+
+                  <div className="flex gap-2">
+                    <Link href={`/people/${person.id}`} className="flex-1">
+                      <Button variant="outline" size="sm" className="w-full">
+                        View profile
+                      </Button>
+                    </Link>
+                    <Link href="/messages" className="flex-1">
+                      <Button variant="outline" size="sm" className="w-full">
+                        Message
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               ))}
             </div>
