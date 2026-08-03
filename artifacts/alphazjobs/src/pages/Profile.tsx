@@ -1,5 +1,5 @@
 import { Link } from 'wouter';
-import { Edit, Sparkles, ExternalLink, Settings, ShieldCheck, Bookmark, X, Trophy, CheckCircle2, Clock, Link2 } from 'lucide-react';
+import { Edit, Sparkles, ExternalLink, Settings, ShieldCheck, Bookmark, X, Trophy, CheckCircle2, Clock, Link2, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { UserAvatar } from '@/components/UserAvatar';
@@ -20,7 +20,7 @@ function getAgeDisplay(age: number): string {
 
 export default function Profile() {
   const { t } = useLanguage();
-  const { user, savedJobIds, appliedJobIds, toggleSaveJob, receipts } = useUser();
+  const { user, savedJobIds, appliedJobIds, toggleSaveJob, receipts, isEmployer } = useUser();
   const displayUser = user ?? fallbackUser;
   const isMinor = displayUser.age < 18;
   const trackedJobIds = Array.from(new Set([...savedJobIds, ...appliedJobIds]));
@@ -85,6 +85,20 @@ export default function Profile() {
               </p>
             </div>
           </div>
+        )}
+
+        {/* Employer mode banner */}
+        {isEmployer && (
+          <Link href="/employer">
+            <div className="bg-card border border-border rounded-lg p-4 mb-6 flex items-center gap-3 hover:border-primary/50 transition-all cursor-pointer">
+              <Briefcase className="w-5 h-5 text-primary shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold">You're in employer mode</p>
+                <p className="text-xs text-muted-foreground">Manage your job posts and applicants</p>
+              </div>
+              <ExternalLink className="w-4 h-4 text-muted-foreground shrink-0" />
+            </div>
+          </Link>
         )}
 
         {/* AI Match CTA */}

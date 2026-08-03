@@ -16,6 +16,9 @@ import AIMatch from '@/pages/AIMatch';
 import Messages from '@/pages/Messages';
 import Rooms from '@/pages/Rooms';
 import Settings from '@/pages/Settings';
+import EmployerDashboard from '@/pages/EmployerDashboard';
+import PostJob from '@/pages/PostJob';
+import JobApplicants from '@/pages/JobApplicants';
 
 const queryClient = new QueryClient();
 
@@ -32,6 +35,9 @@ function Router() {
       <Route path="/messages" component={Messages} />
       <Route path="/rooms" component={Rooms} />
       <Route path="/settings" component={Settings} />
+      <Route path="/employer" component={EmployerDashboard} />
+      <Route path="/employer/post" component={PostJob} />
+      <Route path="/employer/jobs/:jobId" component={JobApplicants} />
       <Route component={NotFound} />
     </Switch>
   );

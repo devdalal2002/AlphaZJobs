@@ -61,6 +61,7 @@ export interface Challenge {
   description: string;
   postedBy: string;
   skillsRequired: string[];
+  linkedJobTitle?: string;
 }
 
 export interface Receipt {
@@ -71,6 +72,17 @@ export interface Receipt {
   date: string;
   skillsProven: string[];
   status: 'pending' | 'verified';
+}
+
+export interface JobApplication {
+  id: string;
+  jobId: string;
+  applicantId: string;
+  applicantName: string;
+  applicantAvatar?: string;
+  note: string;
+  receipts: Receipt[];
+  appliedAt: string;
 }
 
 export const jobs: Job[] = [

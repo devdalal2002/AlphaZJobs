@@ -23,7 +23,7 @@ interface QuickApplyDialogProps {
 }
 
 export function QuickApplyDialog({ job, open, onOpenChange }: QuickApplyDialogProps) {
-  const { user, receipts, applyToJob } = useUser();
+  const { user, receipts, submitApplication } = useUser();
   const { toast } = useToast();
   const verifiedReceipts = (user ? receipts : sampleReceipts).filter(
     (r) => r.status === 'verified'
@@ -47,7 +47,8 @@ export function QuickApplyDialog({ job, open, onOpenChange }: QuickApplyDialogPr
   };
 
   const handleSubmit = () => {
-    applyToJob(job.id);
+    const showcasedReceipts = verifiedReceipts.filter((r) => selectedIds.includes(r.id));
+    submitApplication(job, note, showcasedReceipts);
     onOpenChange(false);
     toast({
       title: `Applied to ${job.company}! 🚀`,

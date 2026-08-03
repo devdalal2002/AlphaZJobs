@@ -13,6 +13,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { TopNav } from '@/components/TopNav';
 import { jobs, sampleUsers, challenges, availableSkills, availableInterests, Job } from '@/data/mock-data';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useUser } from '@/contexts/UserContext';
 import { cn } from '@/lib/utils';
 
 type TabType = 'jobs' | 'people' | 'challenges';
@@ -30,6 +31,7 @@ function getAgeDisplay(age: number): string {
 
 export default function Discover() {
   const { t } = useLanguage();
+  const { postedJobs, postedChallenges } = useUser();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<TabType>('jobs');
   const [jobsViewMode, setJobsViewMode] = useState<JobsViewMode>('list');
@@ -69,7 +71,10 @@ export default function Discover() {
         ? selectedSkills.length
         : selectedSkills.length + selectedInterests.length;
 
-  const filteredJobs = jobs.filter(
+  const allJobs = [...postedJobs, ...jobs];
+  const allChallenges = [...postedChallenges, ...challenges];
+
+  const filteredJobs = allJobs.filter(
     (job) =>
       (job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -81,7 +86,7 @@ export default function Discover() {
         job.skills.some((skill) => selectedSkills.includes(skill)))
   );
 
-  const filteredChallenges = challenges.filter(
+  const filteredChallenges = allChallenges.filter(
     (c) =>
       (c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.postedBy.toLowerCase().includes(searchQuery.toLowerCase()) ||

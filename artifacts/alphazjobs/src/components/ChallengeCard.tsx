@@ -56,6 +56,11 @@ export function ChallengeCard({ challenge, index }: ChallengeCardProps) {
             </div>
             <p className="text-sm text-muted-foreground">Posted by {challenge.postedBy}</p>
           </div>
+          {challenge.linkedJobTitle && (
+            <Badge variant="outline" className="text-xs shrink-0">
+              For: {challenge.linkedJobTitle}
+            </Badge>
+          )}
         </div>
 
         <p className="text-sm text-foreground/80 mb-4">{challenge.description}</p>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, ShieldCheck, Lock, Sun, Moon } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, Lock, Sun, Moon, Briefcase } from 'lucide-react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -19,7 +19,7 @@ import { useTheme } from '@/contexts/ThemeProvider';
 
 export default function Settings() {
   const { language, setLanguage, t } = useLanguage();
-  const { user } = useUser();
+  const { user, isEmployer, toggleEmployerMode } = useUser();
   const { theme, setTheme } = useTheme();
   const isMinor = user ? user.age < 18 : false;
 
@@ -97,6 +97,31 @@ export default function Settings() {
               <Switch checked={isChronicallyOnline} onCheckedChange={handleLanguageToggle} />
             </div>
           </div>
+
+          {/* Employer mode */}
+          {!isMinor && (
+            <div className="bg-card border border-border rounded-lg p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Label className="text-base font-semibold flex items-center gap-2">
+                    <Briefcase className="w-4 h-4" />
+                    I'm hiring
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Switch on to post jobs and review applicants
+                  </p>
+                </div>
+                <Switch checked={isEmployer} onCheckedChange={toggleEmployerMode} />
+              </div>
+              {isEmployer && (
+                <Link href="/employer">
+                  <Button variant="outline" size="sm" className="mt-4 w-full">
+                    Go to Employer Dashboard
+                  </Button>
+                </Link>
+              )}
+            </div>
+          )}
 
           {/* Notifications */}
           <div className="bg-card border border-border rounded-lg p-6">
