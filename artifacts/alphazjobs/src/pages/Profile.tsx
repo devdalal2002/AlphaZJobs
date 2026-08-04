@@ -151,6 +151,7 @@ export default function Profile() {
                   </div>
                   <p className="text-sm text-muted-foreground mb-2">
                     For {receipt.completedFor} · {receipt.date}
+                    {receipt.teammateName && ` · with ${receipt.teammateName}`}
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {receipt.skillsProven.map((skill) => (

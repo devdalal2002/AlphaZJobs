@@ -12,6 +12,7 @@ const APPLICATIONS_KEY = 'alphazjobs.applications';
 const PROFILE_DISCOVERABLE_KEY = 'alphazjobs.profileDiscoverable';
 const MESSAGE_PERMISSION_KEY = 'alphazjobs.messagePermission';
 const NOTIFICATIONS_KEY = 'alphazjobs.notificationsEnabled';
+const SQUAD_PARTNERS_KEY = 'alphazjobs.squadPartners';
 
 const ALL_ACCOUNT_KEYS = [
   STORAGE_KEY,
@@ -25,6 +26,7 @@ const ALL_ACCOUNT_KEYS = [
   PROFILE_DISCOVERABLE_KEY,
   MESSAGE_PERMISSION_KEY,
   NOTIFICATIONS_KEY,
+  SQUAD_PARTNERS_KEY,
 ];
 
 type MessagePermission = 'everyone' | 'restricted';
@@ -48,7 +50,9 @@ interface UserContextType {
   toggleSaveJob: (jobId: string) => void;
   applyToJob: (jobId: string) => void;
   receipts: Receipt[];
-  submitChallenge: (challenge: Challenge) => void;
+  submitChallenge: (challenge: Challenge, teammateName?: string) => void;
+  squadPartners: Record<string, string>;
+  formSquad: (challengeId: string, partnerName: string) => void;
   submitApplication: (job: Job, note: string, showcasedReceipts: Receipt[]) => void;
   isEmployer: boolean;
   toggleEmployerMode: () => void;
@@ -126,6 +130,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
   );
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(() =>
     loadStoredJson(NOTIFICATIONS_KEY, true)
+  );
+  const [squadPartners, setSquadPartners] = useState<Record<string, string>>(() =>
+    loadStoredJson(SQUAD_PARTNERS_KEY, {} as Record<string, string>)
   );
   const verifyTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -227,6 +234,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   }, [notificationsEnabled]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem(SQUAD_PARTNERS_KEY, JSON.stringify(squadPartners));
+    } catch {
+      // ignore
+    }
+  }, [squadPartners]);
+
   const toggleSaveJob = (jobId: string) => {
     setSavedJobIds((prev) =>
       prev.includes(jobId) ? prev.filter((id) => id !== jobId) : [...prev, jobId]
@@ -237,7 +252,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     setAppliedJobIds((prev) => (prev.includes(jobId) ? prev : [...prev, jobId]));
   };
 
-  const submitChallenge = (challenge: Challenge) => {
+  const submitChallenge = (challenge: Challenge, teammateName?: string) => {
     const receiptId = `receipt-${Date.now()}`;
     const newReceipt: Receipt = {
       id: receiptId,
@@ -247,6 +262,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       date: 'Just now',
       skillsProven: challenge.skillsRequired,
       status: 'pending',
+      teammateName,
     };
     setReceipts((prev) => [newReceipt, ...prev]);
 
@@ -256,6 +272,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
       );
     }, 4000);
     verifyTimers.current.push(timer);
+  };
+
+  const formSquad = (challengeId: string, partnerName: string) => {
+    setSquadPartners((prev) => ({ ...prev, [challengeId]: partnerName }));
   };
 
   const submitApplication = (job: Job, note: string, showcasedReceipts: Receipt[]) => {
@@ -330,6 +350,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     setProfileDiscoverable(true);
     setMessagePermission('everyone');
     setNotificationsEnabled(true);
+    setSquadPartners({});
   };
 
   const completeOnboarding = (data: OnboardingData) => {
@@ -359,6 +380,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
     applyToJob,
     receipts,
     submitChallenge,
+    squadPartners,
+    formSquad,
     submitApplication,
     isEmployer,
     toggleEmployerMode,

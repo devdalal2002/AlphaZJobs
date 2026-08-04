@@ -72,6 +72,16 @@ export interface Receipt {
   date: string;
   skillsProven: string[];
   status: 'pending' | 'verified';
+  teammateName?: string;
+}
+
+export interface Quest {
+  id: string;
+  title: string;
+  description: string;
+  challengeIds: string[];
+  reward: string;
+  unlocksJobId: string;
 }
 
 export interface JobApplication {
@@ -490,6 +500,47 @@ export const challenges: Challenge[] = [
     description: 'Given a small CSV of signups, find and summarize one interesting trend.',
     postedBy: 'TechCo',
     skillsRequired: ['Python', 'SQL'],
+  },
+  {
+    id: 'c6',
+    title: 'Build a mini API endpoint',
+    description: 'Stand up one working REST endpoint that reads from a small database.',
+    postedBy: 'ScaleUp',
+    skillsRequired: ['Node.js', 'PostgreSQL'],
+  },
+  {
+    id: 'c7',
+    title: 'Design a mobile app icon set',
+    description: 'Design a cohesive set of 5 app icons in one visual style.',
+    postedBy: 'AppStudio',
+    skillsRequired: ['Figma'],
+  },
+];
+
+export const quests: Quest[] = [
+  {
+    id: 'q1',
+    title: 'Full-Stack Builder Quest',
+    description: 'Prove you can ship both ends of an app.',
+    challengeIds: ['c2', 'c6'],
+    reward: 'Unlocks priority review for Junior Backend Dev at ScaleUp',
+    unlocksJobId: '7',
+  },
+  {
+    id: 'q2',
+    title: 'Content Creator Quest',
+    description: "Show you've got the eye for what makes people click.",
+    challengeIds: ['c1', 'c4'],
+    reward: 'Unlocks priority review for YouTube Thumbnail Designer at Creator Collective',
+    unlocksJobId: '8',
+  },
+  {
+    id: 'q3',
+    title: 'Product Design Quest',
+    description: 'Prove you can take a product from layout to visual system.',
+    challengeIds: ['c3', 'c7'],
+    reward: 'Unlocks priority review for UI Designer at AppStudio',
+    unlocksJobId: '3',
   },
 ];
 

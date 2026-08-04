@@ -7,11 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { JobCard } from '@/components/JobCard';
 import { ChallengeCard } from '@/components/ChallengeCard';
+import { QuestCard } from '@/components/QuestCard';
 import { SwipeJobStack } from '@/components/SwipeJobStack';
 import { UserAvatar } from '@/components/UserAvatar';
 import { BottomNav } from '@/components/BottomNav';
 import { TopNav } from '@/components/TopNav';
-import { jobs, sampleUsers, challenges, availableSkills, availableInterests, Job } from '@/data/mock-data';
+import { jobs, sampleUsers, challenges, quests, availableSkills, availableInterests, Job } from '@/data/mock-data';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUser } from '@/contexts/UserContext';
 import { cn } from '@/lib/utils';
@@ -374,6 +375,21 @@ export default function Discover() {
         {/* Challenges tab */}
         {activeTab === 'challenges' && (
           <>
+            {!searchQuery && selectedSkills.length === 0 && (
+              <div className="mb-10">
+                <h2 className="text-xl font-bold mb-1">Quests</h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Chain related Challenges to unlock priority consideration for a real role.
+                </p>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {quests.map((quest) => (
+                    <QuestCard key={quest.id} quest={quest} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <h2 className="text-xl font-bold mb-4">Challenges</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {filteredChallenges.map((challenge, index) => (
                 <ChallengeCard key={challenge.id} challenge={challenge} index={index} />
