@@ -12,7 +12,7 @@ export default function Dashboard() {
   const { user, savedJobIds, appliedJobIds, receipts, isEmployer, postedJobs, applications } = useUser();
   const displayUser = user ?? fallbackUser;
 
-  const recommended = jobs
+  const recommended = [...postedJobs, ...jobs]
     .map((job) => ({
       job,
       matchingSkills: job.skills.filter((s) => displayUser.skills.includes(s)).length,

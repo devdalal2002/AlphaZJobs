@@ -69,7 +69,15 @@ export default function ProfileEdit() {
     }
   };
 
+  const ageValue = Number(formData.age);
+  const canSave =
+    formData.name.trim().length > 0 &&
+    Number.isInteger(ageValue) &&
+    ageValue >= 13 &&
+    ageValue <= 100;
+
   const handleSave = () => {
+    if (!canSave) return;
     const updatedUser = {
       ...displayUser,
       name: formData.name,
@@ -102,7 +110,7 @@ export default function ProfileEdit() {
             Back
           </Button>
           <h1 className="text-2xl font-black">Edit Profile</h1>
-          <Button onClick={handleSave} className="gap-2">
+          <Button onClick={handleSave} disabled={!canSave} className="gap-2">
             <Save className="w-4 h-4" />
             Save
           </Button>
@@ -149,6 +157,8 @@ export default function ProfileEdit() {
             <label className="block text-sm font-semibold mb-2">Age</label>
             <Input
               type="number"
+              min={13}
+              max={100}
               value={formData.age}
               onChange={(e) => setFormData({ ...formData, age: e.target.value })}
             />

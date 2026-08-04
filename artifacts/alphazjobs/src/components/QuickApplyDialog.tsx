@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Job, sampleReceipts } from '@/data/mock-data';
+import { AlertTriangle } from 'lucide-react';
+import { Job, sampleReceipts, currentUser as fallbackUser } from '@/data/mock-data';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
@@ -25,6 +26,8 @@ interface QuickApplyDialogProps {
 export function QuickApplyDialog({ job, open, onOpenChange }: QuickApplyDialogProps) {
   const { user, receipts, submitApplication } = useUser();
   const { toast } = useToast();
+  const activeUser = user ?? fallbackUser;
+  const isMinor = activeUser.age < 18;
   const verifiedReceipts = (user ? receipts : sampleReceipts).filter(
     (r) => r.status === 'verified'
   );
@@ -66,6 +69,16 @@ export function QuickApplyDialog({ job, open, onOpenChange }: QuickApplyDialogPr
           <DialogTitle>Apply to {job.title}</DialogTitle>
           <DialogDescription>{job.company}</DialogDescription>
         </DialogHeader>
+
+        {job.ageRequirement && isMinor && (
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 flex items-start gap-2">
+            <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-foreground/90">
+              This role has an age requirement ({job.ageRequirement}). You can still apply, but
+              the employer may not be able to move forward until you meet it.
+            </p>
+          </div>
+        )}
 
         {verifiedReceipts.length > 0 ? (
           <div>

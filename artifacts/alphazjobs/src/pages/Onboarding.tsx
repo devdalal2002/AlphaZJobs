@@ -75,8 +75,10 @@ export default function Onboarding() {
     switch (currentStep) {
       case 1:
         return formData.name.trim().length > 0;
-      case 2:
-        return formData.age.trim().length > 0 && Number(formData.age) > 0;
+      case 2: {
+        const age = Number(formData.age);
+        return formData.age.trim().length > 0 && Number.isInteger(age) && age >= 13 && age <= 100;
+      }
       case 3:
         return formData.skills.length > 0;
       case 4:
@@ -122,6 +124,8 @@ export default function Onboarding() {
                 <h2 className="text-3xl font-black">{t.headings.onboarding2Title}</h2>
                 <Input
                   type="number"
+                  min={13}
+                  max={100}
                   placeholder={t.headings.onboarding2Placeholder}
                   value={formData.age}
                   onChange={(e) => setFormData({ ...formData, age: e.target.value })}

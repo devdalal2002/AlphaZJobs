@@ -30,6 +30,8 @@ export default function Settings() {
     setProfileDiscoverable,
     messagePermission,
     setMessagePermission,
+    notificationsEnabled,
+    setNotificationsEnabled,
     deleteAccount,
   } = useUser();
   const { theme, setTheme } = useTheme();
@@ -154,7 +156,7 @@ export default function Settings() {
                   {t.headings.settingsNotificationsSub}
                 </p>
               </div>
-              <Switch defaultChecked />
+              <Switch checked={notificationsEnabled} onCheckedChange={setNotificationsEnabled} />
             </div>
           </div>
 

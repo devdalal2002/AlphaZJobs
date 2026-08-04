@@ -11,6 +11,7 @@ const POSTED_CHALLENGES_KEY = 'alphazjobs.postedChallenges';
 const APPLICATIONS_KEY = 'alphazjobs.applications';
 const PROFILE_DISCOVERABLE_KEY = 'alphazjobs.profileDiscoverable';
 const MESSAGE_PERMISSION_KEY = 'alphazjobs.messagePermission';
+const NOTIFICATIONS_KEY = 'alphazjobs.notificationsEnabled';
 
 const ALL_ACCOUNT_KEYS = [
   STORAGE_KEY,
@@ -23,6 +24,7 @@ const ALL_ACCOUNT_KEYS = [
   APPLICATIONS_KEY,
   PROFILE_DISCOVERABLE_KEY,
   MESSAGE_PERMISSION_KEY,
+  NOTIFICATIONS_KEY,
 ];
 
 type MessagePermission = 'everyone' | 'restricted';
@@ -59,6 +61,8 @@ interface UserContextType {
   setProfileDiscoverable: (value: boolean) => void;
   messagePermission: MessagePermission;
   setMessagePermission: (value: MessagePermission) => void;
+  notificationsEnabled: boolean;
+  setNotificationsEnabled: (value: boolean) => void;
   deleteAccount: () => void;
 }
 
@@ -119,6 +123,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
   );
   const [messagePermission, setMessagePermission] = useState<MessagePermission>(() =>
     loadStoredJson(MESSAGE_PERMISSION_KEY, 'everyone' as MessagePermission)
+  );
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(() =>
+    loadStoredJson(NOTIFICATIONS_KEY, true)
   );
   const verifyTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -211,6 +218,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
       // ignore
     }
   }, [messagePermission]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(notificationsEnabled));
+    } catch {
+      // ignore
+    }
+  }, [notificationsEnabled]);
 
   const toggleSaveJob = (jobId: string) => {
     setSavedJobIds((prev) =>
@@ -314,6 +329,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     setApplications([]);
     setProfileDiscoverable(true);
     setMessagePermission('everyone');
+    setNotificationsEnabled(true);
   };
 
   const completeOnboarding = (data: OnboardingData) => {
@@ -355,6 +371,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
     setProfileDiscoverable,
     messagePermission,
     setMessagePermission,
+    notificationsEnabled,
+    setNotificationsEnabled,
     deleteAccount,
   };
 
