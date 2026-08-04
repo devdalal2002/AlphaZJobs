@@ -9,6 +9,7 @@ import NotFound from '@/pages/not-found';
 import Landing from '@/pages/Landing';
 import Onboarding from '@/pages/Onboarding';
 import Discover from '@/pages/Discover';
+import Dashboard from '@/pages/Dashboard';
 import Profile from '@/pages/Profile';
 import PersonProfile from '@/pages/PersonProfile';
 import ProfileEdit from '@/pages/ProfileEdit';
@@ -27,6 +28,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Landing} />
       <Route path="/onboarding" component={Onboarding} />
+      <Route path="/home" component={Dashboard} />
       <Route path="/discover" component={Discover} />
       <Route path="/profile" component={Profile} />
       <Route path="/people/:id" component={PersonProfile} />

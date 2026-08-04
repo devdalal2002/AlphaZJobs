@@ -61,7 +61,7 @@ export default function Onboarding() {
         interests: formData.interests,
         avatar: formData.avatar || undefined,
       });
-      setLocation('/discover');
+      setLocation('/home');
     }
   };
 

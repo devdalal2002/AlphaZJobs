@@ -8,7 +8,7 @@ export function BottomNav() {
   const [location] = useLocation();
   const { t } = useLanguage();
   const { isOnboarded } = useUser();
-  const homeHref = isOnboarded ? '/discover' : '/';
+  const homeHref = isOnboarded ? '/home' : '/';
 
   const navItems = [
     { href: homeHref, icon: Home, label: t.nav.home },

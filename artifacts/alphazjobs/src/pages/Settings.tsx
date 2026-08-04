@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ArrowLeft, ShieldCheck, Lock, Sun, Moon, Briefcase } from 'lucide-react';
+import { useLocation } from 'wouter';
+import { ArrowLeft, ShieldCheck, Lock, Sun, Moon, Briefcase, AlertTriangle } from 'lucide-react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -16,11 +17,23 @@ import { TopNav } from '@/components/TopNav';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUser } from '@/contexts/UserContext';
 import { useTheme } from '@/contexts/ThemeProvider';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Settings() {
+  const [, setLocation] = useLocation();
   const { language, setLanguage, t } = useLanguage();
-  const { user, isEmployer, toggleEmployerMode } = useUser();
+  const {
+    user,
+    isEmployer,
+    toggleEmployerMode,
+    profileDiscoverable,
+    setProfileDiscoverable,
+    messagePermission,
+    setMessagePermission,
+    deleteAccount,
+  } = useUser();
   const { theme, setTheme } = useTheme();
+  const { toast } = useToast();
   const isMinor = user ? user.age < 18 : false;
 
   const isChronicallyOnline = language === 'en-chronically-online';
@@ -28,6 +41,15 @@ export default function Settings() {
 
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+
+  const handleDeleteAccount = () => {
+    deleteAccount();
+    setConfirmingDelete(false);
+    setAccountOpen(false);
+    toast({ title: 'Account deleted', description: 'All your local data has been cleared.' });
+    setLocation('/');
+  };
 
   const handleLanguageToggle = () => {
     setLanguage(isChronicallyOnline ? 'en-us' : 'en-chronically-online');
@@ -239,21 +261,50 @@ export default function Settings() {
                 <p className="text-xs text-muted-foreground">These restrictions are lifted automatically when you turn 18.</p>
               </>
             ) : (
-              <div className="space-y-3 text-sm text-muted-foreground">
-                <p>Profile visibility: <span className="text-foreground font-medium">Public</span></p>
-                <p>Who can message you: <span className="text-foreground font-medium">Everyone</span></p>
-                <p>Show in discovery: <span className="text-foreground font-medium">Yes</span></p>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium">Show in discovery</p>
+                    <p className="text-xs text-muted-foreground">Appear in the People tab for others to find</p>
+                  </div>
+                  <Switch checked={profileDiscoverable} onCheckedChange={setProfileDiscoverable} />
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-2">Who can message you</p>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant={messagePermission === 'everyone' ? 'default' : 'outline'}
+                      onClick={() => setMessagePermission('everyone')}
+                    >
+                      Everyone
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={messagePermission === 'restricted' ? 'default' : 'outline'}
+                      onClick={() => setMessagePermission('restricted')}
+                    >
+                      Mentors & employers only
+                    </Button>
+                  </div>
+                </div>
               </div>
             )}
           </div>
           <DialogClose asChild>
-            <Button className="w-full mt-2">Got it</Button>
+            <Button className="w-full mt-2">Done</Button>
           </DialogClose>
         </DialogContent>
       </Dialog>
 
       {/* Account Dialog */}
-      <Dialog open={accountOpen} onOpenChange={setAccountOpen}>
+      <Dialog
+        open={accountOpen}
+        onOpenChange={(open) => {
+          setAccountOpen(open);
+          if (!open) setConfirmingDelete(false);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -288,17 +339,44 @@ export default function Settings() {
                 </div>
                 <p className="text-xs text-muted-foreground">These protections are in place to keep you safe while you explore opportunities.</p>
               </>
+            ) : confirmingDelete ? (
+              <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 space-y-3">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-destructive flex-shrink-0 mt-0.5" />
+                  <p className="text-sm font-medium">
+                    This deletes your profile, Receipts, saved jobs, applications, and any posted
+                    jobs — permanently. This can't be undone.
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" className="flex-1" onClick={() => setConfirmingDelete(false)}>
+                    Cancel
+                  </Button>
+                  <Button variant="destructive" size="sm" className="flex-1" onClick={handleDeleteAccount}>
+                    Yes, delete everything
+                  </Button>
+                </div>
+              </div>
             ) : (
               <div className="space-y-3 text-sm text-muted-foreground">
                 <p>Account type: <span className="text-foreground font-medium">Standard</span></p>
                 <p>Member since: <span className="text-foreground font-medium">2026</span></p>
-                <Button variant="destructive" size="sm" className="mt-2">Delete account</Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="mt-2"
+                  onClick={() => setConfirmingDelete(true)}
+                >
+                  Delete account
+                </Button>
               </div>
             )}
           </div>
-          <DialogClose asChild>
-            <Button className="w-full mt-2">Got it</Button>
-          </DialogClose>
+          {!confirmingDelete && (
+            <DialogClose asChild>
+              <Button className="w-full mt-2">Got it</Button>
+            </DialogClose>
+          )}
         </DialogContent>
       </Dialog>
     </div>

@@ -110,6 +110,7 @@ function SwipeCard({ job, index, total, saved, applied, exitDirection, onSkip, o
 
         <div className="flex items-center justify-center gap-3">
           <button
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={onSkip}
             className="bg-secondary hover:bg-secondary/80 text-foreground rounded-full p-3.5 transition-all active:scale-95"
             aria-label="Skip"
@@ -117,6 +118,7 @@ function SwipeCard({ job, index, total, saved, applied, exitDirection, onSkip, o
             <X className="w-5 h-5" />
           </button>
           <button
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={onApply}
             disabled={applied}
             className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full p-4 transition-all active:scale-95 disabled:opacity-50"
@@ -125,6 +127,7 @@ function SwipeCard({ job, index, total, saved, applied, exitDirection, onSkip, o
             <Zap className="w-6 h-6" />
           </button>
           <button
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={onSave}
             className="bg-secondary hover:bg-secondary/80 text-foreground rounded-full p-3.5 transition-all active:scale-95"
             aria-label="Save"

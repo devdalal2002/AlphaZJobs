@@ -9,6 +9,23 @@ const EMPLOYER_KEY = 'alphazjobs.isEmployer';
 const POSTED_JOBS_KEY = 'alphazjobs.postedJobs';
 const POSTED_CHALLENGES_KEY = 'alphazjobs.postedChallenges';
 const APPLICATIONS_KEY = 'alphazjobs.applications';
+const PROFILE_DISCOVERABLE_KEY = 'alphazjobs.profileDiscoverable';
+const MESSAGE_PERMISSION_KEY = 'alphazjobs.messagePermission';
+
+const ALL_ACCOUNT_KEYS = [
+  STORAGE_KEY,
+  SAVED_JOBS_KEY,
+  APPLIED_JOBS_KEY,
+  RECEIPTS_KEY,
+  EMPLOYER_KEY,
+  POSTED_JOBS_KEY,
+  POSTED_CHALLENGES_KEY,
+  APPLICATIONS_KEY,
+  PROFILE_DISCOVERABLE_KEY,
+  MESSAGE_PERMISSION_KEY,
+];
+
+type MessagePermission = 'everyone' | 'restricted';
 
 interface OnboardingData {
   name: string;
@@ -38,6 +55,11 @@ interface UserContextType {
   postJob: (job: Omit<Job, 'id'>, challenge?: Omit<Challenge, 'id' | 'postedBy' | 'linkedJobTitle'>) => void;
   applications: JobApplication[];
   applicationsForJob: (jobId: string) => JobApplication[];
+  profileDiscoverable: boolean;
+  setProfileDiscoverable: (value: boolean) => void;
+  messagePermission: MessagePermission;
+  setMessagePermission: (value: MessagePermission) => void;
+  deleteAccount: () => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -91,6 +113,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
   );
   const [applications, setApplications] = useState<JobApplication[]>(() =>
     loadStoredJson(APPLICATIONS_KEY, [] as JobApplication[])
+  );
+  const [profileDiscoverable, setProfileDiscoverable] = useState<boolean>(() =>
+    loadStoredJson(PROFILE_DISCOVERABLE_KEY, true)
+  );
+  const [messagePermission, setMessagePermission] = useState<MessagePermission>(() =>
+    loadStoredJson(MESSAGE_PERMISSION_KEY, 'everyone' as MessagePermission)
   );
   const verifyTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -167,6 +195,22 @@ export function UserProvider({ children }: { children: ReactNode }) {
       // ignore
     }
   }, [applications]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(PROFILE_DISCOVERABLE_KEY, JSON.stringify(profileDiscoverable));
+    } catch {
+      // ignore
+    }
+  }, [profileDiscoverable]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(MESSAGE_PERMISSION_KEY, JSON.stringify(messagePermission));
+    } catch {
+      // ignore
+    }
+  }, [messagePermission]);
 
   const toggleSaveJob = (jobId: string) => {
     setSavedJobIds((prev) =>
@@ -251,6 +295,27 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const applicationsForJob = (jobId: string) => applications.filter((a) => a.jobId === jobId);
 
+  const deleteAccount = () => {
+    ALL_ACCOUNT_KEYS.forEach((key) => {
+      try {
+        localStorage.removeItem(key);
+      } catch {
+        // ignore
+      }
+    });
+    setUser(null);
+    setIsOnboarded(false);
+    setSavedJobIds([]);
+    setAppliedJobIds([]);
+    setReceipts([]);
+    setIsEmployer(false);
+    setPostedJobs([]);
+    setPostedChallenges([]);
+    setApplications([]);
+    setProfileDiscoverable(true);
+    setMessagePermission('everyone');
+  };
+
   const completeOnboarding = (data: OnboardingData) => {
     const newUser: User = {
       id: 'current-user',
@@ -286,6 +351,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
     postJob,
     applications,
     applicationsForJob,
+    profileDiscoverable,
+    setProfileDiscoverable,
+    messagePermission,
+    setMessagePermission,
+    deleteAccount,
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
