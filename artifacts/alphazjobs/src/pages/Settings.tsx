@@ -318,28 +318,7 @@ export default function Settings() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
-            {isMinor ? (
-              <>
-                <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-                  <p className="text-sm font-semibold mb-2 text-primary">Minor account restrictions</p>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li className="flex items-start gap-2">
-                      <Lock className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                      <span>You cannot receive unsolicited payment offers or job contracts requiring legal sign-off.</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Lock className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                      <span>Jobs marked "18+" will show a notice before you can apply.</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Lock className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                      <span>All employer contacts go through the platform — no direct contact info shared.</span>
-                    </li>
-                  </ul>
-                </div>
-                <p className="text-xs text-muted-foreground">These protections are in place to keep you safe while you explore opportunities.</p>
-              </>
-            ) : confirmingDelete ? (
+            {confirmingDelete ? (
               <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 space-y-3">
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="w-4 h-4 text-destructive flex-shrink-0 mt-0.5" />
@@ -358,18 +337,46 @@ export default function Settings() {
                 </div>
               </div>
             ) : (
-              <div className="space-y-3 text-sm text-muted-foreground">
-                <p>Account type: <span className="text-foreground font-medium">Standard</span></p>
-                <p>Member since: <span className="text-foreground font-medium">2026</span></p>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="mt-2"
-                  onClick={() => setConfirmingDelete(true)}
-                >
-                  Delete account
-                </Button>
-              </div>
+              <>
+                {isMinor && (
+                  <>
+                    <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+                      <p className="text-sm font-semibold mb-2 text-primary">Minor account restrictions</p>
+                      <ul className="space-y-2 text-sm text-muted-foreground">
+                        <li className="flex items-start gap-2">
+                          <Lock className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                          <span>You cannot receive unsolicited payment offers or job contracts requiring legal sign-off.</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <Lock className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                          <span>Jobs marked "18+" will show a notice before you can apply.</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <Lock className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                          <span>All employer contacts go through the platform — no direct contact info shared.</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <p className="text-xs text-muted-foreground">These protections are in place to keep you safe while you explore opportunities.</p>
+                  </>
+                )}
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p>Account type: <span className="text-foreground font-medium">Standard</span></p>
+                  <p>Member since: <span className="text-foreground font-medium">2026</span></p>
+                  <p className="text-xs">
+                    You can delete your account and all its data at any time — this isn't
+                    restricted for minor accounts.
+                  </p>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="mt-2"
+                    onClick={() => setConfirmingDelete(true)}
+                  >
+                    Delete account
+                  </Button>
+                </div>
+              </>
             )}
           </div>
           {!confirmingDelete && (
