@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, Heart, Zap, RotateCcw, MapPin } from 'lucide-react';
+import { X, Heart, RotateCcw, MapPin } from 'lucide-react';
 import { Job } from '@/data/mock-data';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { QuickApplyDialog } from '@/components/QuickApplyDialog';
 import { useUser } from '@/contexts/UserContext';
-import { useToast } from '@/hooks/use-toast';
 
 const SWIPE_THRESHOLD = 100;
 
@@ -25,25 +24,22 @@ interface SwipeCardProps {
   job: Job;
   index: number;
   total: number;
-  saved: boolean;
-  applied: boolean;
   exitDirection: 'left' | 'right';
-  onSkip: () => void;
-  onSave: () => void;
+  onPass: () => void;
   onApply: () => void;
 }
 
-function SwipeCard({ job, index, total, saved, applied, exitDirection, onSkip, onSave, onApply }: SwipeCardProps) {
+function SwipeCard({ job, index, total, exitDirection, onPass, onApply }: SwipeCardProps) {
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-250, 250], [-18, 18]);
-  const saveOpacity = useTransform(x, [20, 120], [0, 1]);
-  const skipOpacity = useTransform(x, [-120, -20], [1, 0]);
+  const applyOpacity = useTransform(x, [20, 120], [0, 1]);
+  const passOpacity = useTransform(x, [-120, -20], [1, 0]);
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
     if (info.offset.x > SWIPE_THRESHOLD) {
-      onSave();
+      onApply();
     } else if (info.offset.x < -SWIPE_THRESHOLD) {
-      onSkip();
+      onPass();
     }
   };
 
@@ -62,16 +58,16 @@ function SwipeCard({ job, index, total, saved, applied, exitDirection, onSkip, o
     >
       {/* Drag direction overlays */}
       <motion.div
-        style={{ opacity: saveOpacity }}
+        style={{ opacity: applyOpacity }}
         className="absolute top-6 right-6 border-4 border-green-500 text-green-500 font-black text-xl px-3 py-1 rounded-lg rotate-12 z-10"
       >
-        SAVE
+        APPLY
       </motion.div>
       <motion.div
-        style={{ opacity: skipOpacity }}
+        style={{ opacity: passOpacity }}
         className="absolute top-6 left-6 border-4 border-red-500 text-red-500 font-black text-xl px-3 py-1 rounded-lg -rotate-12 z-10"
       >
-        SKIP
+        PASS
       </motion.div>
 
       <div className="flex-1 overflow-y-auto">
@@ -105,34 +101,25 @@ function SwipeCard({ job, index, total, saved, applied, exitDirection, onSkip, o
       <div className="pt-4 border-t border-border mt-4">
         <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
           <span>Job {index + 1} of {total}</span>
-          <span>← Skip · Save →</span>
+          <span>← Pass · Apply →</span>
         </div>
 
-        <div className="flex items-center justify-center gap-3">
+        <div className="flex items-center justify-center gap-6">
           <button
             onPointerDown={(e) => e.stopPropagation()}
-            onClick={onSkip}
-            className="bg-secondary hover:bg-secondary/80 text-foreground rounded-full p-3.5 transition-all active:scale-95"
-            aria-label="Skip"
+            onClick={onPass}
+            className="bg-secondary hover:bg-secondary/80 text-foreground rounded-full p-4 transition-all active:scale-95"
+            aria-label="Pass"
           >
-            <X className="w-5 h-5" />
+            <X className="w-6 h-6" />
           </button>
           <button
             onPointerDown={(e) => e.stopPropagation()}
             onClick={onApply}
-            disabled={applied}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full p-4 transition-all active:scale-95 disabled:opacity-50"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full p-4 transition-all active:scale-95"
             aria-label="Apply"
           >
-            <Zap className="w-6 h-6" />
-          </button>
-          <button
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={onSave}
-            className="bg-secondary hover:bg-secondary/80 text-foreground rounded-full p-3.5 transition-all active:scale-95"
-            aria-label="Save"
-          >
-            <Heart className="w-5 h-5" fill={saved ? 'currentColor' : 'none'} />
+            <Heart className="w-6 h-6" fill="currentColor" />
           </button>
         </div>
       </div>
@@ -145,8 +132,7 @@ interface SwipeJobStackProps {
 }
 
 export function SwipeJobStack({ jobs }: SwipeJobStackProps) {
-  const { savedJobIds, appliedJobIds, toggleSaveJob } = useUser();
-  const { toast } = useToast();
+  const { appliedJobIds } = useUser();
   const [index, setIndex] = useState(0);
   const [exitDirection, setExitDirection] = useState<'left' | 'right'>('right');
   const [applyJobId, setApplyJobId] = useState<string | null>(null);
@@ -157,15 +143,14 @@ export function SwipeJobStack({ jobs }: SwipeJobStackProps) {
 
   const advance = () => setIndex((prev) => prev + 1);
 
-  const handleSkip = () => {
+  const handlePass = () => {
     setExitDirection('left');
     advance();
   };
 
-  const handleSave = () => {
-    if (currentJob && !savedJobIds.includes(currentJob.id)) {
-      toggleSaveJob(currentJob.id);
-      toast({ title: 'Saved to your list', description: `${currentJob.title} saved.` });
+  const handleApply = () => {
+    if (currentJob && !appliedJobIds.includes(currentJob.id)) {
+      setApplyJobId(currentJob.id);
     }
     setExitDirection('right');
     advance();
@@ -200,12 +185,9 @@ export function SwipeJobStack({ jobs }: SwipeJobStackProps) {
             job={currentJob}
             index={index}
             total={jobs.length}
-            saved={savedJobIds.includes(currentJob.id)}
-            applied={appliedJobIds.includes(currentJob.id)}
             exitDirection={exitDirection}
-            onSkip={handleSkip}
-            onSave={handleSave}
-            onApply={() => setApplyJobId(currentJob.id)}
+            onPass={handlePass}
+            onApply={handleApply}
           />
         </AnimatePresence>
       </div>
