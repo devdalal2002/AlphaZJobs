@@ -20,12 +20,12 @@ Record your screen (phone or browser at mobile width works best — this is a mo
 1. **Onboarding** (~20s) — walk through name/age/skills/interests/photo.
    > "Onboarding builds an identity from skills and interests, not a job history."
 2. **Discover → Jobs, List view** (~15s) — scroll the feed, open the filter popover, apply a skill filter.
-3. **Discover → Jobs, Swipe mode** (~20s) — tap the Swipe toggle, show it going full-screen, do 2-3 swipes (one save, one skip), tap the lightning bolt to open Apply.
-   > "On mobile, jobs can also be swiped through — but Apply always opens the same flow you'd get anywhere else in the app."
+3. **Discover → Jobs, Swipe mode** (~20s) — tap the Swipe toggle, show it going full-screen, swipe left to pass on one job, swipe right on the next to open Apply.
+   > "On mobile, jobs can also be swiped through, Tinder-style — swipe left to pass, right to apply. Apply always opens the same flow you'd get anywhere else in the app."
 4. **QuickApplyDialog** (~15s) — show the Receipts picker and note field, submit.
    > "Applying lets you attach verified Receipts as proof, not just a cover letter."
-5. **Discover → Challenges tab** (~20s) — open a Challenge, submit for review, show the "pending → verified" status change.
-   > "A Receipt is earned by actually completing a small real task, then it's verified."
+5. **Discover → Challenges tab** (~25s) — point out a Quest card at the top (2 Challenges chained to unlock a real job), then open a Challenge, submit for review, show the "pending → verified" status change.
+   > "A Receipt is earned by actually completing a small real task, then it's verified. Quests chain a couple of related Challenges together to unlock priority consideration for a specific job."
 6. **Profile** (~20s) — scroll through Receipts section, connected platforms ("Your vibe"), saved jobs.
 7. **Discover → People tab → View profile** (~15s) — click into Jordan or Sam's profile, show their Receipts.
    > "Anyone's Receipts are visible before you even message them — that's the credibility signal."
