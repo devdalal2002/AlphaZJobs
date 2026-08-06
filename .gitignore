@@ -48,3 +48,6 @@ Thumbs.db
 .cache/
 .local/
 .vercel
+
+# Personal notes, not for the repo
+CALL_WALKTHROUGH.md
